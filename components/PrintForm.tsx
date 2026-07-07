@@ -24,6 +24,12 @@ export default function PrintForm({ products, onSaved, defaultProductId }: Props
   const selected = products.find((p) => p.id === productId);
 
   useEffect(() => {
+    if (!productId && products.length > 0) {
+      setProductId(defaultProductId ?? products[0].id);
+    }
+  }, [products, productId, defaultProductId]);
+
+  useEffect(() => {
     if (selected) setUnitCost(selected.costPerUnit.toString());
   }, [productId]); // eslint-disable-line react-hooks/exhaustive-deps
 

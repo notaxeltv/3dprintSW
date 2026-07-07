@@ -25,6 +25,12 @@ export default function SaleForm({ products, onSaved, defaultProductId }: Props)
   const selected = products.find((p) => p.id === productId);
 
   useEffect(() => {
+    if (!productId && products.length > 0) {
+      setProductId(defaultProductId ?? products[0].id);
+    }
+  }, [products, productId, defaultProductId]);
+
+  useEffect(() => {
     if (selected) setUnitPrice(selected.price.toString());
   }, [productId]); // eslint-disable-line react-hooks/exhaustive-deps
 
