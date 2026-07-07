@@ -8,6 +8,7 @@ export async function GET() {
     include: {
       prints: true,
       sales: true,
+      variants: { orderBy: { order: "asc" } },
     },
   });
 
@@ -28,6 +29,7 @@ export async function GET() {
       name: product.name,
       description: product.description,
       category: product.category,
+      subcategory: product.subcategory,
       imageUrl: product.imageUrl,
       material: product.material,
       printHours: product.printHours,
@@ -36,6 +38,7 @@ export async function GET() {
       minStock: product.minStock,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
+      variants: product.variants,
       stats: {
         printed,
         sold,
@@ -64,13 +67,27 @@ export async function POST(request: NextRequest) {
       name: parsed.data.name,
       description: parsed.data.description || null,
       category: parsed.data.category || null,
+      subcategory: parsed.data.subcategory || null,
       imageUrl: parsed.data.imageUrl || null,
       material: parsed.data.material || null,
       printHours: parsed.data.printHours ?? null,
       costPerUnit: parsed.data.costPerUnit,
       price: parsed.data.price,
       minStock: parsed.data.minStock ?? 0,
+      variants: parsed.data.variants?.length
+        ? {
+            create: parsed.data.variants.map((v, index) => ({
+              label: v.label || null,
+              height: v.height,
+              width: v.width,
+              depth: v.depth,
+              price: v.price,
+              order: index,
+            })),
+          }
+        : undefined,
     },
+    include: { variants: { orderBy: { order: "asc" } } },
   });
 
   return NextResponse.json(product, { status: 201 });
