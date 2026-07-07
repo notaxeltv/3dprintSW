@@ -14,9 +14,9 @@ Applicazione web per gestire il **catalogo dei modelli 3D**, registrare le **sta
 - **Dark mode**: tema chiaro, scuro o automatico (in base al sistema), con selettore rapido nella barra laterale (o nelle Impostazioni da smartphone).
 - **Esportazione catalogo in PDF**: genera un PDF pronto per la stampa o l'invio ai clienti, così strutturato:
   1. Copertina con logo e nome dell'azienda.
-  2. Pagina bianca.
-  3. Indice con categorie e sottocategorie e relativo numero di pagina.
-  4. Dalla quarta pagina, tabella a 3 colonne con nome dell'articolo, foto e misure disponibili con il prezzo per ciascuna taglia.
+  2. Indice: categorie e sottocategorie con il relativo numero di pagina (le categorie che raggruppano solo sottocategorie non hanno un numero proprio).
+  3. Pagina bianca.
+  4. Dalla quarta pagina, tabella a 3 colonne — **Nome**, **Immagine**, **Dimensioni e Prezzo** — con altezza/larghezza/profondità e prezzo elencati su righe separate per ciascuna taglia disponibile.
 - **Impostazioni azienda**: nome e logo dell'azienda usati nella copertina del PDF, configurabili dalla pagina *Impostazioni*.
 - **Installabile come app (PWA)**: da smartphone Android puoi "Aggiungere alla schermata Home" per usarla come una vera app, senza passare dal browser ogni volta.
 
@@ -111,9 +111,9 @@ Da questi dati l'app calcola in automatico, per ogni modello e in totale: pezzi 
 Dalla pagina **Catalogo**, il pulsante **"Esporta PDF"** genera e scarica un PDF con questa struttura:
 
 1. **Copertina**: logo e nome dell'azienda (configurabili in **Impostazioni**).
-2. **Pagina bianca**.
-3. **Indice**: elenco di categorie e sottocategorie con il relativo numero di pagina.
-4. **Tabella articoli** (dalla quarta pagina): 3 colonne con nome dell'articolo, foto e misure disponibili con il prezzo per ciascuna (es. `10×4×3 cm – 10€`, `15×9×8 cm – 15€`).
+2. **Indice**: elenco di categorie e sottocategorie con il relativo numero di pagina. Una categoria che raggruppa solo sottocategorie (es. "Action figure" con dentro "Pokémon", "Naruto"...) appare come intestazione senza numero proprio; una categoria senza sottocategorie (es. "Litografie") mostra invece il proprio numero di pagina.
+3. **Pagina bianca**.
+4. **Tabella articoli** (dalla quarta pagina): 3 colonne — **Nome** (con eventuale sottotitolo dalla descrizione), **Immagine**, **Dimensioni e Prezzo**. Per ogni taglia disponibile vengono mostrate su righe separate `Altezza`, `Larghezza`, `Profondità` (in cm) e il prezzo in €; se un modello ha più taglie, i blocchi si susseguono uno sotto l'altro nella stessa riga.
 
 Le foto vengono incorporate nel PDF solo se in formato PNG o JPG (caricate tramite l'app o con URL diretto a un file `.png`/`.jpg`); altri formati mostrano un segnaposto "N/D".
 
