@@ -12,6 +12,7 @@ export async function GET(
     include: {
       prints: { orderBy: { printedAt: "desc" } },
       sales: { orderBy: { soldAt: "desc" } },
+      variants: { orderBy: { order: "asc" } },
     },
   });
 
@@ -35,19 +36,36 @@ export async function PUT(
   }
 
   try {
-    const product = await prisma.product.update({
-      where: { id },
-      data: {
-        name: parsed.data.name,
-        description: parsed.data.description || null,
-        category: parsed.data.category || null,
-        imageUrl: parsed.data.imageUrl || null,
-        material: parsed.data.material || null,
-        printHours: parsed.data.printHours ?? null,
-        costPerUnit: parsed.data.costPerUnit,
-        price: parsed.data.price,
-        minStock: parsed.data.minStock ?? 0,
-      },
+    const product = await prisma.$transaction(async (tx) => {
+      await tx.productVariant.deleteMany({ where: { productId: id } });
+      return tx.product.update({
+        where: { id },
+        data: {
+          name: parsed.data.name,
+          description: parsed.data.description || null,
+          category: parsed.data.category || null,
+          subcategory: parsed.data.subcategory || null,
+          imageUrl: parsed.data.imageUrl || null,
+          material: parsed.data.material || null,
+          printHours: parsed.data.printHours ?? null,
+          costPerUnit: parsed.data.costPerUnit,
+          price: parsed.data.price,
+          minStock: parsed.data.minStock ?? 0,
+          variants: parsed.data.variants?.length
+            ? {
+                create: parsed.data.variants.map((v, index) => ({
+                  label: v.label || null,
+                  height: v.height,
+                  width: v.width,
+                  depth: v.depth,
+                  price: v.price,
+                  order: index,
+                })),
+              }
+            : undefined,
+        },
+        include: { variants: { orderBy: { order: "asc" } } },
+      });
     });
     return NextResponse.json(product);
   } catch {

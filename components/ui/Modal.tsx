@@ -30,13 +30,13 @@ export default function Modal({ title, onClose, children, widthClassName = "max-
         onClick={onClose}
       />
       <div
-        className={`relative w-full ${widthClassName} max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl`}
+        className={`relative w-full ${widthClassName} max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-xl dark:bg-slate-900`}
       >
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 sticky top-0 bg-white rounded-t-2xl">
-          <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 sticky top-0 bg-white rounded-t-2xl dark:border-slate-800 dark:bg-slate-900">
+          <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">{title}</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
           >
             <X size={18} />
           </button>

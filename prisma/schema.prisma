@@ -17,6 +17,7 @@ model Product {
   name        String
   description String?
   category    String?
+  subcategory String?
   imageUrl    String?
   material    String?
   printHours  Float?
@@ -26,8 +27,27 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  prints PrintLog[]
-  sales  SaleLog[]
+  prints   PrintLog[]
+  sales    SaleLog[]
+  variants ProductVariant[]
+}
+
+model ProductVariant {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  label     String?
+  height    Float
+  width     Float
+  depth     Float
+  price     Float
+  order     Int     @default(0)
+}
+
+model Settings {
+  id          Int     @id @default(1)
+  companyName String  @default("La mia azienda")
+  logoUrl     String?
 }
 
 model PrintLog {

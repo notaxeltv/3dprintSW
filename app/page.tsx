@@ -52,8 +52,8 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Dashboard</h1>
-        <p className="text-sm text-slate-500">
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Dashboard</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           Panoramica del catalogo, delle stampe, delle vendite e del profitto.
         </p>
       </div>
@@ -111,7 +111,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card className="p-5 lg:col-span-2">
-          <h2 className="mb-4 text-sm font-semibold text-slate-800">
+          <h2 className="mb-4 text-sm font-semibold text-slate-800 dark:text-slate-200">
             Andamento ultimi 6 mesi
           </h2>
           {hasMonthlyData ? (
@@ -136,19 +136,19 @@ export default function DashboardPage() {
         </Card>
 
         <Card className="p-5">
-          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-800">
+          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200">
             <AlertTriangle size={16} className="text-amber-500" /> Scorte da ristampare
           </h2>
           {lowStock.length === 0 ? (
-            <p className="text-sm text-slate-400">Nessun modello sotto scorta minima.</p>
+            <p className="text-sm text-slate-400 dark:text-slate-500">Nessun modello sotto scorta minima.</p>
           ) : (
             <ul className="space-y-3">
               {lowStock.map((p) => (
                 <li key={p.id} className="flex items-center justify-between text-sm">
-                  <Link href={`/catalogo/${p.id}`} className="font-medium text-slate-700 hover:text-indigo-600">
+                  <Link href={`/catalogo/${p.id}`} className="font-medium text-slate-700 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400">
                     {p.name}
                   </Link>
-                  <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700">
+                  <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-400">
                     {formatNumber(p.stock)} pz
                   </span>
                 </li>
@@ -160,14 +160,14 @@ export default function DashboardPage() {
 
       <Card className="overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4">
-          <h2 className="text-sm font-semibold text-slate-800">Modelli più profittevoli</h2>
-          <Link href="/catalogo" className="text-xs font-medium text-indigo-600 hover:text-indigo-700">
+          <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200">Modelli più profittevoli</h2>
+          <Link href="/catalogo" className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
             Vai al catalogo →
           </Link>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+            <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
               <tr>
                 <th className="px-5 py-3 font-medium">Modello</th>
                 <th className="px-5 py-3 font-medium">Stampati</th>
@@ -176,18 +176,18 @@ export default function DashboardPage() {
                 <th className="px-5 py-3 font-medium">Profitto</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {topProfitable.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-slate-400">
+                  <td colSpan={5} className="px-5 py-8 text-center text-slate-400 dark:text-slate-500">
                     Nessun dato disponibile ancora.
                   </td>
                 </tr>
               )}
               {topProfitable.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-50">
-                  <td className="px-5 py-3 font-medium text-slate-800">
-                    <Link href={`/catalogo/${p.id}`} className="hover:text-indigo-600">
+                <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <td className="px-5 py-3 font-medium text-slate-800 dark:text-slate-200">
+                    <Link href={`/catalogo/${p.id}`} className="hover:text-indigo-600 dark:hover:text-indigo-400">
                       {p.name}
                     </Link>
                   </td>
@@ -197,8 +197,8 @@ export default function DashboardPage() {
                   <td
                     className={
                       p.profit >= 0
-                        ? "px-5 py-3 font-semibold text-emerald-600"
-                        : "px-5 py-3 font-semibold text-rose-600"
+                        ? "px-5 py-3 font-semibold text-emerald-600 dark:text-emerald-400"
+                        : "px-5 py-3 font-semibold text-rose-600 dark:text-rose-400"
                     }
                   >
                     {formatCurrency(p.profit)}

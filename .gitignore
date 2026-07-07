@@ -48,3 +48,7 @@ next-env.d.ts
 /dev.db-journal
 /prisma/*.db
 /prisma/*.db-journal
+
+# uploaded files (immagini prodotti/logo)
+/public/uploads/*
+!/public/uploads/.gitkeep
