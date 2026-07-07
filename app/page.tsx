@@ -34,15 +34,28 @@ function monthLabel(key: string) {
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/stats")
-      .then((r) => r.json())
-      .then(setStats);
+    fetch("/api/overview")
+      .then((r) => {
+        if (!r.ok) throw new Error(`Richiesta fallita (${r.status})`);
+        return r.json();
+      })
+      .then(setStats)
+      .catch(() => {
+        setError(
+          "Non è stato possibile caricare i dati della dashboard. Se usi un blocco pubblicità/tracker nel browser, provalo a disattivare per questo sito e ricarica la pagina."
+        );
+      });
   }, []);
 
+  if (error) {
+    return <p className="text-sm text-rose-600 dark:text-rose-400">{error}</p>;
+  }
+
   if (!stats) {
-    return <p className="text-sm text-slate-500">Caricamento dashboard...</p>;
+    return <p className="text-sm text-slate-500 dark:text-slate-400">Caricamento dashboard...</p>;
   }
 
   const { totals, monthly, topProfitable, lowStock } = stats;

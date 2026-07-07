@@ -71,6 +71,12 @@ Essendo un'app Node.js, **gira nativamente su Windows, macOS e Linux**. Il datab
 
 7. Apri il browser su [http://localhost:3000](http://localhost:3000).
 
+### Accesso da smartphone (stessa rete Wi-Fi)
+
+Nel terminale, oltre a `Local: http://localhost:3000`, viene mostrata anche una riga `Network: http://<IP>:3000`: usa quell'indirizzo dal browser del telefono per accedere all'app dal PC.
+
+In modalità sviluppo (`npm run dev`), se l'IP del tuo PC non è già presente nell'elenco `allowedDevOrigins` di `next.config.ts` vedrai in console un avviso `Blocked cross-origin request...`: non impedisce l'uso dell'app, ma per farlo sparire aggiungi il tuo IP locale in quell'elenco e riavvia `npm run dev`. In modalità produzione (`npm run build` + `npm run start`) questo avviso non compare mai.
+
 L'app resterà attiva finché la finestra del terminale rimane aperta. Per fermarla premi `Ctrl+C`.
 
 ## Controllo da smartphone Android (sulla stessa rete Wi-Fi)
