@@ -1,9 +1,11 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { Plus, Trash2, Ruler } from "lucide-react";
 import { Product } from "@/lib/types";
 import Button from "./ui/Button";
 import { Input, Label, Textarea, FieldError } from "./ui/Field";
+import ImageUploadField from "./ImageUploadField";
 
 interface Props {
   product?: Product | null;
@@ -11,11 +13,24 @@ interface Props {
   onCancel: () => void;
 }
 
+interface VariantRow {
+  label: string;
+  height: string;
+  width: string;
+  depth: string;
+  price: string;
+}
+
+function emptyVariant(): VariantRow {
+  return { label: "", height: "", width: "", depth: "", price: "" };
+}
+
 export default function ProductForm({ product, onSaved, onCancel }: Props) {
   const [form, setForm] = useState({
     name: product?.name ?? "",
     description: product?.description ?? "",
     category: product?.category ?? "",
+    subcategory: product?.subcategory ?? "",
     imageUrl: product?.imageUrl ?? "",
     material: product?.material ?? "",
     printHours: product?.printHours?.toString() ?? "",
@@ -23,6 +38,17 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
     price: product?.price?.toString() ?? "0",
     minStock: product?.minStock?.toString() ?? "0",
   });
+  const [variants, setVariants] = useState<VariantRow[]>(
+    product?.variants?.length
+      ? product.variants.map((v) => ({
+          label: v.label ?? "",
+          height: v.height.toString(),
+          width: v.width.toString(),
+          depth: v.depth.toString(),
+          price: v.price.toString(),
+        }))
+      : []
+  );
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -31,11 +57,33 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
+  function updateVariant(index: number, key: keyof VariantRow, value: string) {
+    setVariants((rows) => rows.map((row, i) => (i === index ? { ...row, [key]: value } : row)));
+  }
+
+  function addVariant() {
+    setVariants((rows) => [...rows, emptyVariant()]);
+  }
+
+  function removeVariant(index: number) {
+    setVariants((rows) => rows.filter((_, i) => i !== index));
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setSubmitting(true);
     setErrors({});
     setFormError(null);
+
+    const validVariants = variants
+      .filter((v) => v.height !== "" || v.width !== "" || v.depth !== "" || v.price !== "")
+      .map((v) => ({
+        label: v.label || null,
+        height: Number(v.height || 0),
+        width: Number(v.width || 0),
+        depth: Number(v.depth || 0),
+        price: Number(v.price || 0),
+      }));
 
     const payload = {
       ...form,
@@ -43,6 +91,7 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
       costPerUnit: Number(form.costPerUnit),
       price: Number(form.price),
       minStock: Number(form.minStock),
+      variants: validVariants,
     };
 
     try {
@@ -76,7 +125,9 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {formError && (
-        <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</div>
+        <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+          {formError}
+        </div>
       )}
 
       <div>
@@ -97,7 +148,7 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
           id="description"
           value={form.description}
           onChange={update("description")}
-          placeholder="Dettagli, dimensioni, note..."
+          placeholder="Dettagli, note..."
         />
       </div>
 
@@ -112,25 +163,31 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
           />
         </div>
         <div>
-          <Label htmlFor="material">Materiale</Label>
+          <Label htmlFor="subcategory">Sottocategoria</Label>
           <Input
-            id="material"
-            value={form.material}
-            onChange={update("material")}
-            placeholder="Es. PLA, PETG..."
+            id="subcategory"
+            value={form.subcategory}
+            onChange={update("subcategory")}
+            placeholder="Es. Vasi"
           />
         </div>
       </div>
 
       <div>
-        <Label htmlFor="imageUrl">URL immagine</Label>
+        <Label htmlFor="material">Materiale</Label>
         <Input
-          id="imageUrl"
-          value={form.imageUrl}
-          onChange={update("imageUrl")}
-          placeholder="https://..."
+          id="material"
+          value={form.material}
+          onChange={update("material")}
+          placeholder="Es. PLA, PETG..."
         />
       </div>
+
+      <ImageUploadField
+        label="Foto del modello"
+        value={form.imageUrl}
+        onChange={(url) => setForm((f) => ({ ...f, imageUrl: url }))}
+      />
 
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -182,6 +239,84 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
             required
           />
           <FieldError>{errors.price?.[0]}</FieldError>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-700">
+        <div className="mb-3 flex items-center justify-between">
+          <Label className="mb-0 flex items-center gap-1.5">
+            <Ruler size={14} /> Misure e prezzi disponibili
+          </Label>
+          <Button type="button" variant="secondary" size="sm" onClick={addVariant}>
+            <Plus size={14} /> Aggiungi misura
+          </Button>
+        </div>
+
+        {variants.length === 0 && (
+          <p className="text-xs text-slate-400">
+            Facoltativo: aggiungi una o più combinazioni altezza × larghezza × profondità con il
+            relativo prezzo. Verranno mostrate nel catalogo e nel PDF esportato.
+          </p>
+        )}
+
+        <div className="space-y-2">
+          {variants.map((row, index) => (
+            <div key={index} className="grid grid-cols-12 gap-2 items-end">
+              <div className="col-span-3">
+                {index === 0 && <Label className="text-[11px]">Etichetta</Label>}
+                <Input
+                  value={row.label}
+                  onChange={(e) => updateVariant(index, "label", e.target.value)}
+                  placeholder="Es. S"
+                />
+              </div>
+              <div className="col-span-2">
+                {index === 0 && <Label className="text-[11px]">Alt. (cm)</Label>}
+                <Input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={row.height}
+                  onChange={(e) => updateVariant(index, "height", e.target.value)}
+                />
+              </div>
+              <div className="col-span-2">
+                {index === 0 && <Label className="text-[11px]">Larg. (cm)</Label>}
+                <Input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={row.width}
+                  onChange={(e) => updateVariant(index, "width", e.target.value)}
+                />
+              </div>
+              <div className="col-span-2">
+                {index === 0 && <Label className="text-[11px]">Prof. (cm)</Label>}
+                <Input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={row.depth}
+                  onChange={(e) => updateVariant(index, "depth", e.target.value)}
+                />
+              </div>
+              <div className="col-span-2">
+                {index === 0 && <Label className="text-[11px]">Prezzo (€)</Label>}
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={row.price}
+                  onChange={(e) => updateVariant(index, "price", e.target.value)}
+                />
+              </div>
+              <div className="col-span-1">
+                <Button type="button" variant="ghost" size="sm" onClick={() => removeVariant(index)}>
+                  <Trash2 size={14} className="text-rose-500" />
+                </Button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
