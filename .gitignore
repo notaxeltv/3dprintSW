@@ -57,3 +57,10 @@ next-env.d.ts
 /electron/resources/
 /dist-electron/
 /dist-electron-out/
+
+# build portabile senza electron (server + node.exe + db template)
+/3DPrintSW-portable/
+
+# archivi di distribuzione per il cliente
+*.rar
+*.zip
