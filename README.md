@@ -4,19 +4,29 @@ Applicazione web per gestire il **catalogo dei modelli 3D**, registrare le **sta
 
 ## Funzionalità
 
-- **Catalogo modelli**: crea, modifica ed elimina i modelli 3D (nome, categoria, materiale, ore di stampa, costo unitario, prezzo di vendita, immagine, scorta minima).
+- **Catalogo modelli**: crea, modifica ed elimina i modelli 3D (nome, categoria, sottocategoria, materiale, ore di stampa, costo unitario, prezzo di vendita, foto, scorta minima).
+- **Misure e prezzi per taglia**: ad ogni modello puoi associare più combinazioni di altezza × larghezza × profondità, ciascuna con il proprio prezzo (es. S 10×4×3 cm → 10€, M 15×9×8 cm → 15€...).
+- **Foto dei modelli**: carica una foto direttamente dal PC/telefono (salvata in locale in `public/uploads`) oppure incolla un URL esterno.
 - **Registro stampe**: registra ogni stampa completata (quantità, costo unitario, data, note) → aggiorna automaticamente il magazzino disponibile.
 - **Registro vendite**: registra ogni vendita (quantità, prezzo, acquirente, data) → blocca vendite superiori alla disponibilità in magazzino.
 - **Dashboard**: totali di pezzi stampati/venduti/in magazzino, ricavi, costi, profitto netto, valore del magazzino, grafico degli ultimi 6 mesi, modelli più profittevoli, avviso scorte sotto la soglia minima.
-- **Scheda modello**: storico completo di stampe e vendite per ogni singolo modello, con calcolo del profitto specifico.
+- **Scheda modello**: storico completo di stampe e vendite per ogni singolo modello, con calcolo del profitto specifico e riepilogo delle misure/prezzi disponibili.
+- **Dark mode**: tema chiaro, scuro o automatico (in base al sistema), con selettore rapido nella barra laterale (o nelle Impostazioni da smartphone).
+- **Esportazione catalogo in PDF**: genera un PDF pronto per la stampa o l'invio ai clienti, così strutturato:
+  1. Copertina con logo e nome dell'azienda.
+  2. Pagina bianca.
+  3. Indice con categorie e sottocategorie e relativo numero di pagina.
+  4. Dalla quarta pagina, tabella a 3 colonne con nome dell'articolo, foto e misure disponibili con il prezzo per ciascuna taglia.
+- **Impostazioni azienda**: nome e logo dell'azienda usati nella copertina del PDF, configurabili dalla pagina *Impostazioni*.
 - **Installabile come app (PWA)**: da smartphone Android puoi "Aggiungere alla schermata Home" per usarla come una vera app, senza passare dal browser ogni volta.
 
 ## Stack tecnico
 
 - [Next.js](https://nextjs.org/) (App Router, TypeScript) — sia frontend che API in un unico progetto
 - [Prisma ORM](https://www.prisma.io/) + SQLite (`better-sqlite3`) — database locale su file, nessun server esterno da configurare
-- Tailwind CSS — interfaccia
+- Tailwind CSS — interfaccia, con supporto dark mode via `next-themes`
 - Recharts — grafici della dashboard
+- [PDFKit](https://pdfkit.org/) — generazione del catalogo in PDF lato server
 
 Essendo un'app Node.js, **gira nativamente su Windows, macOS e Linux**. Il database è un singolo file SQLite (`dev.db`), non serve installare MySQL/Postgres.
 
@@ -88,15 +98,28 @@ L'app espone automaticamente un indirizzo di rete locale (visibile nel terminale
 
 ## Struttura dei dati
 
-- **Product** (modello del catalogo): nome, descrizione, categoria, materiale, ore di stampa, costo unitario, prezzo, scorta minima.
+- **Product** (modello del catalogo): nome, descrizione, categoria, sottocategoria, materiale, ore di stampa, costo unitario, prezzo, foto, scorta minima.
+- **ProductVariant** (misure/prezzi): altezza, larghezza, profondità e prezzo per ogni taglia disponibile di un modello (es. S/M/L).
 - **PrintLog** (registro stampe): modello collegato, quantità stampata, costo unitario al momento della stampa, data, note.
 - **SaleLog** (registro vendite): modello collegato, quantità venduta, prezzo unitario al momento della vendita, data, acquirente, note.
+- **Settings** (impostazioni azienda): nome azienda e logo, usati nella copertina del catalogo PDF.
 
 Da questi dati l'app calcola in automatico, per ogni modello e in totale: pezzi stampati, pezzi venduti, giacenza a magazzino, ricavi, costo di produzione, costo del venduto (COGS) e profitto netto.
 
+## Esportazione del catalogo in PDF
+
+Dalla pagina **Catalogo**, il pulsante **"Esporta PDF"** genera e scarica un PDF con questa struttura:
+
+1. **Copertina**: logo e nome dell'azienda (configurabili in **Impostazioni**).
+2. **Pagina bianca**.
+3. **Indice**: elenco di categorie e sottocategorie con il relativo numero di pagina.
+4. **Tabella articoli** (dalla quarta pagina): 3 colonne con nome dell'articolo, foto e misure disponibili con il prezzo per ciascuna (es. `10×4×3 cm – 10€`, `15×9×8 cm – 15€`).
+
+Le foto vengono incorporate nel PDF solo se in formato PNG o JPG (caricate tramite l'app o con URL diretto a un file `.png`/`.jpg`); altri formati mostrano un segnaposto "N/D".
+
 ## Backup dei dati
 
-Tutti i dati sono salvati nel file `dev.db` nella cartella del progetto. Per fare un backup basta copiare questo file altrove; per ripristinarlo, sostituiscilo nella cartella del progetto (ad app spenta).
+Tutti i dati sono salvati nel file `dev.db` nella cartella del progetto, e le foto caricate nella cartella `public/uploads`. Per fare un backup basta copiare questi elementi altrove; per ripristinarli, sostituiscili nella cartella del progetto (ad app spenta).
 
 ## Possibili estensioni future
 
