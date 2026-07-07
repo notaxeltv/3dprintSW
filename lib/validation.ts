@@ -1,18 +1,37 @@
 import { z } from "zod";
 
+export const productVariantSchema = z.object({
+  label: z.string().trim().optional().nullable(),
+  height: z.coerce.number().min(0, "Non può essere negativa"),
+  width: z.coerce.number().min(0, "Non può essere negativa"),
+  depth: z.coerce.number().min(0, "Non può essere negativa"),
+  price: z.coerce.number().min(0, "Non può essere negativo"),
+});
+
+export type ProductVariantInput = z.infer<typeof productVariantSchema>;
+
 export const productSchema = z.object({
   name: z.string().trim().min(1, "Il nome è obbligatorio"),
   description: z.string().trim().optional().nullable(),
   category: z.string().trim().optional().nullable(),
+  subcategory: z.string().trim().optional().nullable(),
   imageUrl: z.string().trim().optional().nullable(),
   material: z.string().trim().optional().nullable(),
   printHours: z.coerce.number().min(0).optional().nullable(),
   costPerUnit: z.coerce.number().min(0, "Il costo non può essere negativo"),
   price: z.coerce.number().min(0, "Il prezzo non può essere negativo"),
   minStock: z.coerce.number().int().min(0).optional(),
+  variants: z.array(productVariantSchema).optional(),
 });
 
 export type ProductInput = z.infer<typeof productSchema>;
+
+export const settingsSchema = z.object({
+  companyName: z.string().trim().min(1, "Il nome dell'azienda è obbligatorio"),
+  logoUrl: z.string().trim().optional().nullable(),
+});
+
+export type SettingsInput = z.infer<typeof settingsSchema>;
 
 export const printLogSchema = z.object({
   productId: z.string().min(1, "Seleziona un modello"),

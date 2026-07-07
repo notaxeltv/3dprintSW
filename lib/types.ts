@@ -8,11 +8,23 @@ export interface ProductStats {
   profit: number;
 }
 
+export interface ProductVariant {
+  id: string;
+  productId: string;
+  label: string | null;
+  height: number;
+  width: number;
+  depth: number;
+  price: number;
+  order: number;
+}
+
 export interface Product {
   id: string;
   name: string;
   description: string | null;
   category: string | null;
+  subcategory: string | null;
   imageUrl: string | null;
   material: string | null;
   printHours: number | null;
@@ -22,6 +34,12 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
   stats: ProductStats;
+  variants?: ProductVariant[];
+}
+
+export interface Settings {
+  companyName: string;
+  logoUrl: string | null;
 }
 
 export interface PrintLog {
