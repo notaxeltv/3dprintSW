@@ -1,6 +1,8 @@
 {
   "name": "3dprintsw",
   "version": "0.1.0",
+  "description": "Gestione catalogo, stampe, vendite e profitti per attività di stampa 3D.",
+  "author": "3DPrintSW",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,8 +12,11 @@
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "electron:resources": "node scripts/prepare-electron-resources.cjs",
+    "electron:build": "npm run build && npm run electron:resources && electron-builder"
   },
+  "main": "electron/main.cjs",
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.8.0",
     "@prisma/client": "^7.8.0",
@@ -29,12 +34,37 @@
     "recharts": "^3.9.2",
     "zod": "^4.4.3"
   },
+  "build": {
+    "appId": "com.tredprintsw.app",
+    "productName": "3DPrintSW",
+    "directories": {
+      "output": "dist-electron-out"
+    },
+    "files": [
+      "electron/main.cjs",
+      "package.json",
+      "!node_modules/**/*"
+    ],
+    "npmRebuild": false,
+    "extraResources": [
+      { "from": ".next/standalone", "to": "app-server" },
+      { "from": ".next/standalone/node_modules", "to": "app-server/node_modules" },
+      { "from": "electron/resources/node", "to": "node" },
+      { "from": "electron/resources/template", "to": "template" }
+    ],
+    "win": {
+      "target": "portable",
+      "signAndEditExecutable": false
+    }
+  },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/pdfkit": "^0.17.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "electron": "^43.0.0",
+    "electron-builder": "^26.15.3",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",

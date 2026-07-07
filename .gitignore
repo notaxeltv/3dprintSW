@@ -52,3 +52,8 @@ next-env.d.ts
 # uploaded files (immagini prodotti/logo)
 /public/uploads/*
 !/public/uploads/.gitkeep
+
+# electron desktop build
+/electron/resources/
+/dist-electron/
+/dist-electron-out/
