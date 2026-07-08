@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Pencil, Trash2, PackageSearch, ImageOff, FileDown } from "lucide-react";
 import { Product } from "@/lib/types";
-import { formatCurrency, formatNumber } from "@/lib/format";
+import { formatCurrency, formatNumber, formatUnitPrice } from "@/lib/format";
 import { Card } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Modal from "@/components/ui/Modal";
@@ -195,7 +195,7 @@ export default function CatalogoPage() {
 
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-slate-500 dark:text-slate-400">
-                      {formatCurrency(product.costPerUnit)} → {formatCurrency(product.price)}
+                      {formatUnitPrice(product.costPerUnit)} → {formatUnitPrice(product.price)}
                     </span>
                     <span
                       className={

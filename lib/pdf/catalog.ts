@@ -55,8 +55,15 @@ interface TocEntry {
   page: number | null;
 }
 
+import { PRICE_DECIMALS } from "@/lib/format";
+
 function fmtNum(n: number): string {
   return Number(n.toFixed(2)).toString();
+}
+
+function fmtPrice(n: number): string {
+  const fixed = n.toFixed(PRICE_DECIMALS);
+  return fixed.replace(/\.?0+$/, "") || "0";
 }
 
 function collator(a: string, b: string) {
@@ -425,7 +432,7 @@ export async function generateCatalogPdf(): Promise<Buffer> {
             .font("Helvetica-Bold")
             .fontSize(10.5)
             .fillColor(NAVY)
-            .text(`${fmtNum(v.price)}€`, col3X, lineY, { width: col3Width, align: "center" });
+            .text(`${fmtPrice(v.price)}€`, col3X, lineY, { width: col3Width, align: "center" });
 
           blockY += variantHeights[i] + VARIANT_BLOCK_GAP;
         }

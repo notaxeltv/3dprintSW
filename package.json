@@ -14,6 +14,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "electron:resources": "node scripts/prepare-electron-resources.cjs",
+    "portable:build": "node scripts/prepare-portable.cjs",
     "electron:build": "npm run build && npm run electron:resources && electron-builder"
   },
   "main": "electron/main.cjs",

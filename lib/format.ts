@@ -1,7 +1,20 @@
+export const PRICE_DECIMALS = 7;
+export const PRICE_STEP = "0.0000001";
+
 export function formatCurrency(value: number): string {
   return new Intl.NumberFormat("it-IT", {
     style: "currency",
     currency: "EUR",
+  }).format(value);
+}
+
+/** Prezzi unitari con fino a 7 decimali (es. 0,0157161 €). */
+export function formatUnitPrice(value: number): string {
+  return new Intl.NumberFormat("it-IT", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: PRICE_DECIMALS,
   }).format(value);
 }
 

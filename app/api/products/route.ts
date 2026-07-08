@@ -9,6 +9,7 @@ export async function GET() {
       prints: true,
       sales: true,
       variants: { orderBy: { order: "asc" } },
+      spool: true,
     },
   });
 
@@ -33,6 +34,9 @@ export async function GET() {
       imageUrl: product.imageUrl,
       material: product.material,
       printHours: product.printHours,
+      weightGrams: product.weightGrams,
+      spoolId: product.spoolId,
+      spool: product.spool,
       costPerUnit: product.costPerUnit,
       price: product.price,
       minStock: product.minStock,
@@ -71,6 +75,8 @@ export async function POST(request: NextRequest) {
       imageUrl: parsed.data.imageUrl || null,
       material: parsed.data.material || null,
       printHours: parsed.data.printHours ?? null,
+      weightGrams: parsed.data.weightGrams ?? null,
+      spoolId: parsed.data.spoolId || null,
       costPerUnit: parsed.data.costPerUnit,
       price: parsed.data.price,
       minStock: parsed.data.minStock ?? 0,

@@ -18,6 +18,8 @@ export const productSchema = z.object({
   imageUrl: z.string().trim().optional().nullable(),
   material: z.string().trim().optional().nullable(),
   printHours: z.coerce.number().min(0).optional().nullable(),
+  weightGrams: z.coerce.number().min(0).optional().nullable(),
+  spoolId: z.string().trim().optional().nullable(),
   costPerUnit: z.coerce.number().min(0, "Il costo non può essere negativo"),
   price: z.coerce.number().min(0, "Il prezzo non può essere negativo"),
   minStock: z.coerce.number().int().min(0).optional(),
@@ -26,9 +28,21 @@ export const productSchema = z.object({
 
 export type ProductInput = z.infer<typeof productSchema>;
 
+export const spoolSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().trim().min(1, "Il nome della bobina è obbligatorio"),
+  material: z.string().trim().optional().nullable(),
+  price: z.coerce.number().min(0, "Il prezzo non può essere negativo"),
+  weightGrams: z.coerce.number().positive("Il peso deve essere maggiore di 0"),
+});
+
+export type SpoolInput = z.infer<typeof spoolSchema>;
+
 export const settingsSchema = z.object({
   companyName: z.string().trim().min(1, "Il nome dell'azienda è obbligatorio"),
   logoUrl: z.string().trim().optional().nullable(),
+  electricityCostPerHour: z.coerce.number().min(0).optional(),
+  spools: z.array(spoolSchema).optional(),
 });
 
 export type SettingsInput = z.infer<typeof settingsSchema>;

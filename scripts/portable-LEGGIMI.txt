@@ -1,0 +1,30 @@
+3DPrintSW - Versione portabile per Windows
+============================================
+
+COME AVVIARE IL PROGRAMMA
+1. Estrai questa cartella intera in una posizione qualsiasi del PC
+   (es. Desktop o Documenti). Non spostare i file singolarmente:
+   servono tutti insieme, nella stessa cartella.
+2. Fai doppio clic su "Avvia.bat".
+3. Si aprira' una finestra nera (il "motore" del programma) e dopo
+   pochi secondi il browser si aprira' automaticamente sulla dashboard.
+4. NON chiudere la finestra nera mentre usi il programma: e' quella
+   che fa funzionare tutto. Puoi ridurla a icona se da fastidio.
+5. Per chiudere il programma, chiudi semplicemente la finestra nera.
+
+DOVE VENGONO SALVATI I DATI
+Tutti i dati (prodotti, immagini caricate, impostazioni) vengono
+salvati dentro la sottocartella "data" di questa cartella. Se vuoi
+fare un backup, basta copiare quella sottocartella.
+NON cancellare la cartella "data" se non vuoi perdere i dati inseriti.
+
+SE VEDI LA VERSIONE VECCHIA NEL BROWSER
+Chiudi tutte le finestre del programma, riapri Avvia.bat e premi
+Ctrl+F5 nel browser per ricaricare senza cache.
+
+SE QUALCOSA NON FUNZIONA
+- Assicurati di aver estratto TUTTA la cartella (non solo il file
+  Avvia.bat) e che nessun antivirus abbia rimosso/messo in quarantena
+  file dentro "app-server" o "node".
+- Controlla il file VERSION.txt: indica la data dell'ultima build.
+- Se la finestra nera si chiude subito con un errore, riavvia Avvia.bat.

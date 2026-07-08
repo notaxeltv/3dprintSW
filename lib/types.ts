@@ -19,6 +19,15 @@ export interface ProductVariant {
   order: number;
 }
 
+export interface Spool {
+  id: string;
+  name: string;
+  material: string | null;
+  price: number;
+  weightGrams: number;
+  createdAt: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -28,6 +37,9 @@ export interface Product {
   imageUrl: string | null;
   material: string | null;
   printHours: number | null;
+  weightGrams: number | null;
+  spoolId: string | null;
+  spool?: Spool | null;
   costPerUnit: number;
   price: number;
   minStock: number;
@@ -40,6 +52,8 @@ export interface Product {
 export interface Settings {
   companyName: string;
   logoUrl: string | null;
+  electricityCostPerHour: number;
+  spools?: Spool[];
 }
 
 export interface PrintLog {

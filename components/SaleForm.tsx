@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { Product } from "@/lib/types";
-import { formatDateTimeInput } from "@/lib/format";
+import { formatDateTimeInput, PRICE_STEP } from "@/lib/format";
 import Button from "./ui/Button";
 import { Input, Label, Select, Textarea } from "./ui/Field";
 
@@ -105,7 +105,7 @@ export default function SaleForm({ products, onSaved, defaultProductId }: Props)
           <Input
             id="unitPrice"
             type="number"
-            step="0.01"
+            step={PRICE_STEP}
             min="0"
             value={unitPrice}
             onChange={(e) => setUnitPrice(e.target.value)}

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ImageOff, Printer, ShoppingCart, Pencil, Trash2, Ruler } from "lucide-react";
-import { formatCurrency, formatDate, formatNumber } from "@/lib/format";
+import { formatCurrency, formatDate, formatNumber, formatUnitPrice } from "@/lib/format";
 import type { Product, ProductVariant } from "@/lib/types";
 import { Card } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -37,6 +37,8 @@ interface ProductDetail {
   imageUrl: string | null;
   material: string | null;
   printHours: number | null;
+  weightGrams: number | null;
+  spoolId: string | null;
   costPerUnit: number;
   price: number;
   minStock: number;
@@ -157,11 +159,11 @@ export default function ProductDetailPage() {
               </div>
               <div className="rounded-lg bg-slate-50 p-2 dark:bg-slate-800/60">
                 <p className="text-xs text-slate-400 dark:text-slate-500">Costo unitario</p>
-                <p className="font-medium text-slate-700 dark:text-slate-200">{formatCurrency(product.costPerUnit)}</p>
+                <p className="font-medium text-slate-700 dark:text-slate-200">{formatUnitPrice(product.costPerUnit)}</p>
               </div>
               <div className="rounded-lg bg-slate-50 p-2 dark:bg-slate-800/60">
                 <p className="text-xs text-slate-400 dark:text-slate-500">Prezzo vendita</p>
-                <p className="font-medium text-slate-700 dark:text-slate-200">{formatCurrency(product.price)}</p>
+                <p className="font-medium text-slate-700 dark:text-slate-200">{formatUnitPrice(product.price)}</p>
               </div>
             </div>
 
@@ -181,7 +183,7 @@ export default function ProductDetailPage() {
                         {v.height}×{v.width}×{v.depth} cm
                       </span>
                       <span className="font-medium text-slate-800 dark:text-slate-100">
-                        {formatCurrency(v.price)}
+                        {formatUnitPrice(v.price)}
                       </span>
                     </li>
                   ))}

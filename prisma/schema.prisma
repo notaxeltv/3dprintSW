@@ -21,6 +21,9 @@ model Product {
   imageUrl    String?
   material    String?
   printHours  Float?
+  weightGrams Float?
+  spoolId     String?
+  spool       Spool?   @relation(fields: [spoolId], references: [id], onDelete: SetNull)
   costPerUnit Float    @default(0)
   price       Float    @default(0)
   minStock    Int      @default(0)
@@ -45,9 +48,22 @@ model ProductVariant {
 }
 
 model Settings {
-  id          Int     @id @default(1)
-  companyName String  @default("La mia azienda")
-  logoUrl     String?
+  id                     Int     @id @default(1)
+  companyName            String  @default("La mia azienda")
+  logoUrl                String?
+  hourlyRate             Float   @default(0)
+  electricityCostPerHour Float   @default(0)
+}
+
+model Spool {
+  id          String    @id @default(cuid())
+  name        String
+  material    String?
+  price       Float
+  weightGrams Float
+  createdAt   DateTime  @default(now())
+
+  products Product[]
 }
 
 model PrintLog {

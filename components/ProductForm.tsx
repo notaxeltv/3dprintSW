@@ -1,8 +1,10 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Plus, Trash2, Ruler } from "lucide-react";
-import { Product } from "@/lib/types";
+import { Product, Settings, Spool } from "@/lib/types";
+import { calculateProductCost, formatEuro, formatPriceValue } from "@/lib/cost";
+import { PRICE_STEP } from "@/lib/format";
 import Button from "./ui/Button";
 import { Input, Label, Textarea, FieldError } from "./ui/Field";
 import ImageUploadField from "./ImageUploadField";
@@ -34,6 +36,8 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
     imageUrl: product?.imageUrl ?? "",
     material: product?.material ?? "",
     printHours: product?.printHours?.toString() ?? "",
+    weightGrams: product?.weightGrams?.toString() ?? "",
+    spoolId: product?.spoolId ?? "",
     costPerUnit: product?.costPerUnit?.toString() ?? "0",
     price: product?.price?.toString() ?? "0",
     minStock: product?.minStock?.toString() ?? "0",
@@ -49,13 +53,66 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
         }))
       : []
   );
+  const [spools, setSpools] = useState<Spool[]>([]);
+  const [electricityCostPerHour, setElectricityCostPerHour] = useState(0);
+  const [costManual, setCostManual] = useState(false);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((data: Settings) => {
+        setSpools(data.spools ?? []);
+        setElectricityCostPerHour(data.electricityCostPerHour ?? 0);
+      });
+  }, []);
+
+  const selectedSpool = useMemo(
+    () => spools.find((s) => s.id === form.spoolId) ?? null,
+    [spools, form.spoolId]
+  );
+
+  const costBreakdown = useMemo(() => {
+    const printHours = Number(form.printHours || 0);
+    const weightGrams = Number(form.weightGrams || 0);
+    if (!selectedSpool) {
+      return calculateProductCost({
+        printHours,
+        weightGrams: 0,
+        electricityCostPerHour,
+        spoolPrice: 0,
+        spoolWeightGrams: 0,
+      });
+    }
+    return calculateProductCost({
+      printHours,
+      weightGrams,
+      electricityCostPerHour,
+      spoolPrice: selectedSpool.price,
+      spoolWeightGrams: selectedSpool.weightGrams,
+    });
+  }, [form.printHours, form.weightGrams, selectedSpool, electricityCostPerHour]);
+
+  useEffect(() => {
+    if (costManual) return;
+    setForm((f) => ({ ...f, costPerUnit: formatPriceValue(costBreakdown.total) }));
+  }, [costBreakdown.total, costManual]);
+
   const update = (key: keyof typeof form) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => setForm((f) => ({ ...f, [key]: e.target.value }));
+
+  function handleSpoolChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const spoolId = e.target.value;
+    const spool = spools.find((s) => s.id === spoolId);
+    setForm((f) => ({
+      ...f,
+      spoolId,
+      material: spool?.material || f.material,
+    }));
+  }
 
   function updateVariant(index: number, key: keyof VariantRow, value: string) {
     setVariants((rows) => rows.map((row, i) => (i === index ? { ...row, [key]: value } : row)));
@@ -88,6 +145,8 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
     const payload = {
       ...form,
       printHours: form.printHours === "" ? null : Number(form.printHours),
+      weightGrams: form.weightGrams === "" ? null : Number(form.weightGrams),
+      spoolId: form.spoolId || null,
       costPerUnit: Number(form.costPerUnit),
       price: Number(form.price),
       minStock: Number(form.minStock),
@@ -173,14 +232,38 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
         </div>
       </div>
 
-      <div>
-        <Label htmlFor="material">Materiale</Label>
-        <Input
-          id="material"
-          value={form.material}
-          onChange={update("material")}
-          placeholder="Es. PLA, PETG..."
-        />
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="spoolId">Bobina filamento</Label>
+          <select
+            id="spoolId"
+            value={form.spoolId}
+            onChange={handleSpoolChange}
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+          >
+            <option value="">Seleziona bobina...</option>
+            {spools.map((spool) => (
+              <option key={spool.id} value={spool.id}>
+                {spool.name}
+                {spool.material ? ` (${spool.material})` : ""}
+              </option>
+            ))}
+          </select>
+          {spools.length === 0 && (
+            <p className="mt-1 text-xs text-slate-400">
+              Nessuna bobina configurata. Aggiungile in Impostazioni.
+            </p>
+          )}
+        </div>
+        <div>
+          <Label htmlFor="material">Materiale</Label>
+          <Input
+            id="material"
+            value={form.material}
+            onChange={update("material")}
+            placeholder="Es. PLA, PETG..."
+          />
+        </div>
       </div>
 
       <ImageUploadField
@@ -189,7 +272,7 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
         onChange={(url) => setForm((f) => ({ ...f, imageUrl: url }))}
       />
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <div>
           <Label htmlFor="printHours">Ore di stampa</Label>
           <Input
@@ -199,6 +282,18 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
             min="0"
             value={form.printHours}
             onChange={update("printHours")}
+          />
+        </div>
+        <div>
+          <Label htmlFor="weightGrams">Peso (g)</Label>
+          <Input
+            id="weightGrams"
+            type="number"
+            step="1"
+            min="0"
+            value={form.weightGrams}
+            onChange={update("weightGrams")}
+            placeholder="Es. 45"
           />
         </div>
         <div>
@@ -213,16 +308,45 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
         </div>
       </div>
 
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900/50">
+        <div className="mb-2 flex items-center justify-between">
+          <Label className="mb-0">Calcolo costo automatico</Label>
+          <label className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+            <input
+              type="checkbox"
+              checked={costManual}
+              onChange={(e) => setCostManual(e.target.checked)}
+              className="rounded border-slate-300"
+            />
+            Inserimento manuale
+          </label>
+        </div>
+        <div className="grid grid-cols-2 gap-3 text-xs text-slate-600 dark:text-slate-300">
+          <div>
+            <span className="text-slate-400">Ore × costo orario corrente</span>
+            <p className="font-medium">€ {formatEuro(costBreakdown.electricityCost)}</p>
+          </div>
+          <div>
+            <span className="text-slate-400">Grammi × prezzo bobina</span>
+            <p className="font-medium">€ {formatEuro(costBreakdown.filamentCost)}</p>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="costPerUnit">Costo unitario (€) *</Label>
           <Input
             id="costPerUnit"
             type="number"
-            step="0.01"
+            step={PRICE_STEP}
             min="0"
             value={form.costPerUnit}
-            onChange={update("costPerUnit")}
+            onChange={(e) => {
+              setCostManual(true);
+              update("costPerUnit")(e);
+            }}
+            readOnly={!costManual}
             required
           />
           <FieldError>{errors.costPerUnit?.[0]}</FieldError>
@@ -232,7 +356,7 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
           <Input
             id="price"
             type="number"
-            step="0.01"
+            step={PRICE_STEP}
             min="0"
             value={form.price}
             onChange={update("price")}
@@ -304,7 +428,7 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
                 {index === 0 && <Label className="text-[11px]">Prezzo (€)</Label>}
                 <Input
                   type="number"
-                  step="0.01"
+                  step={PRICE_STEP}
                   min="0"
                   value={row.price}
                   onChange={(e) => updateVariant(index, "price", e.target.value)}
