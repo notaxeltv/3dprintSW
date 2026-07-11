@@ -6,11 +6,15 @@ export interface CostParams {
   electricityCostPerHour: number;
   spoolPrice: number;
   spoolWeightGrams: number;
+  labelPrice?: number;
+  keychainPrice?: number;
 }
 
 export interface CostBreakdown {
   electricityCost: number;
   filamentCost: number;
+  labelCost: number;
+  keychainCost: number;
   total: number;
 }
 
@@ -26,11 +30,15 @@ export function calculateProductCost(params: CostParams): CostBreakdown {
 
   const electricityCost = hours * Math.max(0, params.electricityCostPerHour);
   const filamentCost = grams * pricePerGram;
+  const labelCost = params.labelPrice != null ? Math.max(0, params.labelPrice) : 0;
+  const keychainCost = params.keychainPrice != null ? Math.max(0, params.keychainPrice) : 0;
 
   return {
     electricityCost,
     filamentCost,
-    total: electricityCost + filamentCost,
+    labelCost,
+    keychainCost,
+    total: electricityCost + filamentCost + labelCost + keychainCost,
   };
 }
 

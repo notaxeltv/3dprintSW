@@ -39,6 +39,8 @@ interface ProductDetail {
   printHours: number | null;
   weightGrams: number | null;
   spoolId: string | null;
+  labelOptionId: string | null;
+  keychainId: string | null;
   costPerUnit: number;
   price: number;
   minStock: number;

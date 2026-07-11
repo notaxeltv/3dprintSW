@@ -20,6 +20,8 @@ export const productSchema = z.object({
   printHours: z.coerce.number().min(0).optional().nullable(),
   weightGrams: z.coerce.number().min(0).optional().nullable(),
   spoolId: z.string().trim().optional().nullable(),
+  labelOptionId: z.string().trim().optional().nullable(),
+  keychainId: z.string().trim().optional().nullable(),
   costPerUnit: z.coerce.number().min(0, "Il costo non può essere negativo"),
   price: z.coerce.number().min(0, "Il prezzo non può essere negativo"),
   minStock: z.coerce.number().int().min(0).optional(),
@@ -38,11 +40,29 @@ export const spoolSchema = z.object({
 
 export type SpoolInput = z.infer<typeof spoolSchema>;
 
+export const labelOptionSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().trim().min(1, "Il nome dell'etichetta è obbligatorio"),
+  price: z.coerce.number().min(0, "Il prezzo non può essere negativo"),
+});
+
+export type LabelOptionInput = z.infer<typeof labelOptionSchema>;
+
+export const keychainSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().trim().min(1, "Il nome del portachiavi è obbligatorio"),
+  price: z.coerce.number().min(0, "Il prezzo non può essere negativo"),
+});
+
+export type KeychainInput = z.infer<typeof keychainSchema>;
+
 export const settingsSchema = z.object({
   companyName: z.string().trim().min(1, "Il nome dell'azienda è obbligatorio"),
   logoUrl: z.string().trim().optional().nullable(),
   electricityCostPerHour: z.coerce.number().min(0).optional(),
   spools: z.array(spoolSchema).optional(),
+  labelOptions: z.array(labelOptionSchema).optional(),
+  keychains: z.array(keychainSchema).optional(),
 });
 
 export type SettingsInput = z.infer<typeof settingsSchema>;

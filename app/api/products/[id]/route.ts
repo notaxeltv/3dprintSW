@@ -14,6 +14,8 @@ export async function GET(
       sales: { orderBy: { soldAt: "desc" } },
       variants: { orderBy: { order: "asc" } },
       spool: true,
+      labelOption: true,
+      keychain: true,
     },
   });
 
@@ -51,6 +53,8 @@ export async function PUT(
           printHours: parsed.data.printHours ?? null,
           weightGrams: parsed.data.weightGrams ?? null,
           spoolId: parsed.data.spoolId || null,
+          labelOptionId: parsed.data.labelOptionId || null,
+          keychainId: parsed.data.keychainId || null,
           costPerUnit: parsed.data.costPerUnit,
           price: parsed.data.price,
           minStock: parsed.data.minStock ?? 0,

@@ -28,6 +28,20 @@ export interface Spool {
   createdAt: string;
 }
 
+export interface LabelOption {
+  id: string;
+  name: string;
+  price: number;
+  createdAt: string;
+}
+
+export interface Keychain {
+  id: string;
+  name: string;
+  price: number;
+  createdAt: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -40,6 +54,10 @@ export interface Product {
   weightGrams: number | null;
   spoolId: string | null;
   spool?: Spool | null;
+  labelOptionId: string | null;
+  labelOption?: LabelOption | null;
+  keychainId: string | null;
+  keychain?: Keychain | null;
   costPerUnit: number;
   price: number;
   minStock: number;
@@ -54,6 +72,8 @@ export interface Settings {
   logoUrl: string | null;
   electricityCostPerHour: number;
   spools?: Spool[];
+  labelOptions?: LabelOption[];
+  keychains?: Keychain[];
 }
 
 export interface PrintLog {

@@ -10,6 +10,8 @@ export async function GET() {
       sales: true,
       variants: { orderBy: { order: "asc" } },
       spool: true,
+      labelOption: true,
+      keychain: true,
     },
   });
 
@@ -37,6 +39,10 @@ export async function GET() {
       weightGrams: product.weightGrams,
       spoolId: product.spoolId,
       spool: product.spool,
+      labelOptionId: product.labelOptionId,
+      labelOption: product.labelOption,
+      keychainId: product.keychainId,
+      keychain: product.keychain,
       costPerUnit: product.costPerUnit,
       price: product.price,
       minStock: product.minStock,
@@ -77,6 +83,8 @@ export async function POST(request: NextRequest) {
       printHours: parsed.data.printHours ?? null,
       weightGrams: parsed.data.weightGrams ?? null,
       spoolId: parsed.data.spoolId || null,
+      labelOptionId: parsed.data.labelOptionId || null,
+      keychainId: parsed.data.keychainId || null,
       costPerUnit: parsed.data.costPerUnit,
       price: parsed.data.price,
       minStock: parsed.data.minStock ?? 0,

@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Plus, Trash2, Ruler } from "lucide-react";
-import { Product, Settings, Spool } from "@/lib/types";
+import { Product, Settings, Spool, LabelOption, Keychain } from "@/lib/types";
 import { calculateProductCost, formatEuro, formatPriceValue } from "@/lib/cost";
 import { PRICE_STEP } from "@/lib/format";
 import Button from "./ui/Button";
@@ -27,6 +27,9 @@ function emptyVariant(): VariantRow {
   return { label: "", height: "", width: "", depth: "", price: "" };
 }
 
+const selectClassName =
+  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100";
+
 export default function ProductForm({ product, onSaved, onCancel }: Props) {
   const [form, setForm] = useState({
     name: product?.name ?? "",
@@ -38,6 +41,8 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
     printHours: product?.printHours?.toString() ?? "",
     weightGrams: product?.weightGrams?.toString() ?? "",
     spoolId: product?.spoolId ?? "",
+    labelOptionId: product?.labelOptionId ?? "",
+    keychainId: product?.keychainId ?? "",
     costPerUnit: product?.costPerUnit?.toString() ?? "0",
     price: product?.price?.toString() ?? "0",
     minStock: product?.minStock?.toString() ?? "0",
@@ -54,6 +59,8 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
       : []
   );
   const [spools, setSpools] = useState<Spool[]>([]);
+  const [labelOptions, setLabelOptions] = useState<LabelOption[]>([]);
+  const [keychains, setKeychains] = useState<Keychain[]>([]);
   const [electricityCostPerHour, setElectricityCostPerHour] = useState(0);
   const [costManual, setCostManual] = useState(false);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
@@ -65,6 +72,8 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
       .then((r) => r.json())
       .then((data: Settings) => {
         setSpools(data.spools ?? []);
+        setLabelOptions(data.labelOptions ?? []);
+        setKeychains(data.keychains ?? []);
         setElectricityCostPerHour(data.electricityCostPerHour ?? 0);
       });
   }, []);
@@ -74,26 +83,36 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
     [spools, form.spoolId]
   );
 
+  const selectedLabel = useMemo(
+    () => labelOptions.find((l) => l.id === form.labelOptionId) ?? null,
+    [labelOptions, form.labelOptionId]
+  );
+
+  const selectedKeychain = useMemo(
+    () => keychains.find((k) => k.id === form.keychainId) ?? null,
+    [keychains, form.keychainId]
+  );
+
   const costBreakdown = useMemo(() => {
     const printHours = Number(form.printHours || 0);
     const weightGrams = Number(form.weightGrams || 0);
-    if (!selectedSpool) {
-      return calculateProductCost({
-        printHours,
-        weightGrams: 0,
-        electricityCostPerHour,
-        spoolPrice: 0,
-        spoolWeightGrams: 0,
-      });
-    }
     return calculateProductCost({
       printHours,
-      weightGrams,
+      weightGrams: selectedSpool ? weightGrams : 0,
       electricityCostPerHour,
-      spoolPrice: selectedSpool.price,
-      spoolWeightGrams: selectedSpool.weightGrams,
+      spoolPrice: selectedSpool?.price ?? 0,
+      spoolWeightGrams: selectedSpool?.weightGrams ?? 0,
+      labelPrice: selectedLabel ? selectedLabel.price : undefined,
+      keychainPrice: selectedKeychain ? selectedKeychain.price : undefined,
     });
-  }, [form.printHours, form.weightGrams, selectedSpool, electricityCostPerHour]);
+  }, [
+    form.printHours,
+    form.weightGrams,
+    selectedSpool,
+    selectedLabel,
+    selectedKeychain,
+    electricityCostPerHour,
+  ]);
 
   useEffect(() => {
     if (costManual) return;
@@ -147,6 +166,8 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
       printHours: form.printHours === "" ? null : Number(form.printHours),
       weightGrams: form.weightGrams === "" ? null : Number(form.weightGrams),
       spoolId: form.spoolId || null,
+      labelOptionId: form.labelOptionId || null,
+      keychainId: form.keychainId || null,
       costPerUnit: Number(form.costPerUnit),
       price: Number(form.price),
       minStock: Number(form.minStock),
@@ -239,7 +260,7 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
             id="spoolId"
             value={form.spoolId}
             onChange={handleSpoolChange}
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+            className={selectClassName}
           >
             <option value="">Seleziona bobina...</option>
             {spools.map((spool) => (
@@ -263,6 +284,51 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
             onChange={update("material")}
             placeholder="Es. PLA, PETG..."
           />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="labelOptionId">Etichetta (facoltativo)</Label>
+          <select
+            id="labelOptionId"
+            value={form.labelOptionId}
+            onChange={update("labelOptionId")}
+            className={selectClassName}
+          >
+            <option value="">Nessuna — non aggiunge costo</option>
+            {labelOptions.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+          {labelOptions.length === 0 && (
+            <p className="mt-1 text-xs text-slate-400">
+              Nessuna etichetta configurata. Aggiungile in Impostazioni.
+            </p>
+          )}
+        </div>
+        <div>
+          <Label htmlFor="keychainId">Portachiavi (facoltativo)</Label>
+          <select
+            id="keychainId"
+            value={form.keychainId}
+            onChange={update("keychainId")}
+            className={selectClassName}
+          >
+            <option value="">Nessuno — non aggiunge costo</option>
+            {keychains.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+          {keychains.length === 0 && (
+            <p className="mt-1 text-xs text-slate-400">
+              Nessun portachiavi configurato. Aggiungili in Impostazioni.
+            </p>
+          )}
         </div>
       </div>
 
@@ -324,12 +390,24 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
         <div className="grid grid-cols-2 gap-3 text-xs text-slate-600 dark:text-slate-300">
           <div>
             <span className="text-slate-400">Ore × costo orario corrente</span>
-            <p className="font-medium">€ {formatEuro(costBreakdown.electricityCost)}</p>
+            <p className="font-medium">{formatEuro(costBreakdown.electricityCost)}</p>
           </div>
           <div>
             <span className="text-slate-400">Grammi × prezzo bobina</span>
-            <p className="font-medium">€ {formatEuro(costBreakdown.filamentCost)}</p>
+            <p className="font-medium">{formatEuro(costBreakdown.filamentCost)}</p>
           </div>
+          {form.labelOptionId && (
+            <div>
+              <span className="text-slate-400">Etichetta selezionata</span>
+              <p className="font-medium">{formatEuro(costBreakdown.labelCost)}</p>
+            </div>
+          )}
+          {form.keychainId && (
+            <div>
+              <span className="text-slate-400">Portachiavi selezionato</span>
+              <p className="font-medium">{formatEuro(costBreakdown.keychainCost)}</p>
+            </div>
+          )}
         </div>
       </div>
 

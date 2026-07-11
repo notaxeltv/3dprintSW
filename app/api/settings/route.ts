@@ -8,10 +8,48 @@ async function getOrCreateSettings() {
   return prisma.settings.create({ data: { id: 1 } });
 }
 
+type PriceItem = { id?: string; name: string; price: number };
+
+async function syncLabelOptions(
+  tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0],
+  items: PriceItem[] | undefined
+) {
+  if (items === undefined) return;
+  const incomingIds = items.map((s) => s.id).filter((id): id is string => Boolean(id));
+  await tx.labelOption.deleteMany({
+    where: incomingIds.length ? { id: { notIn: incomingIds } } : {},
+  });
+  for (const item of items) {
+    const data = { name: item.name, price: item.price };
+    if (item.id) await tx.labelOption.update({ where: { id: item.id }, data });
+    else await tx.labelOption.create({ data });
+  }
+}
+
+async function syncKeychains(
+  tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0],
+  items: PriceItem[] | undefined
+) {
+  if (items === undefined) return;
+  const incomingIds = items.map((s) => s.id).filter((id): id is string => Boolean(id));
+  await tx.keychain.deleteMany({
+    where: incomingIds.length ? { id: { notIn: incomingIds } } : {},
+  });
+  for (const item of items) {
+    const data = { name: item.name, price: item.price };
+    if (item.id) await tx.keychain.update({ where: { id: item.id }, data });
+    else await tx.keychain.create({ data });
+  }
+}
+
 export async function GET() {
   const settings = await getOrCreateSettings();
-  const spools = await prisma.spool.findMany({ orderBy: { createdAt: "asc" } });
-  return NextResponse.json({ ...settings, spools });
+  const [spools, labelOptions, keychains] = await Promise.all([
+    prisma.spool.findMany({ orderBy: { createdAt: "asc" } }),
+    prisma.labelOption.findMany({ orderBy: { createdAt: "asc" } }),
+    prisma.keychain.findMany({ orderBy: { createdAt: "asc" } }),
+  ]);
+  return NextResponse.json({ ...settings, spools, labelOptions, keychains });
 }
 
 export async function PUT(request: NextRequest) {
@@ -40,9 +78,7 @@ export async function PUT(request: NextRequest) {
         .filter((id): id is string => Boolean(id));
 
       await tx.spool.deleteMany({
-        where: incomingIds.length
-          ? { id: { notIn: incomingIds } }
-          : {},
+        where: incomingIds.length ? { id: { notIn: incomingIds } } : {},
       });
 
       for (const spool of parsed.data.spools) {
@@ -69,8 +105,16 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    const spools = await tx.spool.findMany({ orderBy: { createdAt: "asc" } });
-    return { ...updated, spools };
+    await syncLabelOptions(tx, parsed.data.labelOptions);
+    await syncKeychains(tx, parsed.data.keychains);
+
+    const [spools, labelOptions, keychains] = await Promise.all([
+      tx.spool.findMany({ orderBy: { createdAt: "asc" } }),
+      tx.labelOption.findMany({ orderBy: { createdAt: "asc" } }),
+      tx.keychain.findMany({ orderBy: { createdAt: "asc" } }),
+    ]);
+
+    return { ...updated, spools, labelOptions, keychains };
   });
 
   return NextResponse.json(settings);

@@ -23,7 +23,11 @@ model Product {
   printHours  Float?
   weightGrams Float?
   spoolId     String?
-  spool       Spool?   @relation(fields: [spoolId], references: [id], onDelete: SetNull)
+  spool       Spool?        @relation(fields: [spoolId], references: [id], onDelete: SetNull)
+  labelOptionId String?
+  labelOption LabelOption?  @relation(fields: [labelOptionId], references: [id], onDelete: SetNull)
+  keychainId    String?
+  keychain      Keychain?     @relation(fields: [keychainId], references: [id], onDelete: SetNull)
   costPerUnit Float    @default(0)
   price       Float    @default(0)
   minStock    Int      @default(0)
@@ -62,6 +66,24 @@ model Spool {
   price       Float
   weightGrams Float
   createdAt   DateTime  @default(now())
+
+  products Product[]
+}
+
+model LabelOption {
+  id        String    @id @default(cuid())
+  name      String
+  price     Float
+  createdAt DateTime  @default(now())
+
+  products Product[]
+}
+
+model Keychain {
+  id        String    @id @default(cuid())
+  name      String
+  price     Float
+  createdAt DateTime  @default(now())
 
   products Product[]
 }
