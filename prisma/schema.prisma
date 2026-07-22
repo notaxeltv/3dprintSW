@@ -30,6 +30,40 @@ model Product {
   prints   PrintLog[]
   sales    SaleLog[]
   variants ProductVariant[]
+  markups  ShopProductMarkup[]
+}
+
+model Shop {
+  id        String   @id @default(cuid())
+  name      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User?
+  markups ShopProductMarkup[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  role         String
+  shopId       String?  @unique
+  shop         Shop?    @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model ShopProductMarkup {
+  id            String  @id @default(cuid())
+  shopId        String
+  shop          Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  markupPercent Float   @default(0)
+
+  @@unique([shopId, productId])
 }
 
 model ProductVariant {

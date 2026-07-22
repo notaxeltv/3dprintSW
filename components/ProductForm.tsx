@@ -228,7 +228,7 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
           <FieldError>{errors.costPerUnit?.[0]}</FieldError>
         </div>
         <div>
-          <Label htmlFor="price">Prezzo di vendita (€) *</Label>
+          <Label htmlFor="price">Prezzo al negozio (€) *</Label>
           <Input
             id="price"
             type="number"
@@ -301,7 +301,7 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
                 />
               </div>
               <div className="col-span-2">
-                {index === 0 && <Label className="text-[11px]">Prezzo (€)</Label>}
+                {index === 0 && <Label className="text-[11px]">Prezzo negozio (€)</Label>}
                 <Input
                   type="number"
                   step="0.01"
