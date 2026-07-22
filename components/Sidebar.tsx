@@ -12,6 +12,7 @@ import {
   Settings,
   Store,
   LogOut,
+  ClipboardList,
 } from "lucide-react";
 import clsx from "clsx";
 import ThemeToggle from "./ThemeToggle";
@@ -22,6 +23,7 @@ const adminLinks = [
   { href: "/catalogo", label: "Catalogo", icon: Package },
   { href: "/stampe", label: "Stampe", icon: Printer },
   { href: "/vendite", label: "Vendite", icon: ShoppingCart },
+  { href: "/ordini-negozi", label: "Ordini negozi", icon: ClipboardList },
   { href: "/negozi", label: "Negozi", icon: Store },
 ];
 
@@ -29,6 +31,7 @@ const shopLinks = [
   { href: "/negozio", label: "Dashboard", icon: LayoutDashboard },
   { href: "/negozio/catalogo", label: "Catalogo", icon: Package },
   { href: "/negozio/vendite", label: "Vendite", icon: ShoppingCart },
+  { href: "/negozio/ordini", label: "Ordini", icon: ClipboardList },
 ];
 
 export default function Sidebar() {

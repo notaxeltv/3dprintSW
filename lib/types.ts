@@ -97,6 +97,28 @@ export interface ShopSaleLog {
   variant: { id: string; label: string | null } | null;
 }
 
+export interface ShopOrderItem {
+  id: string;
+  productId: string;
+  variantId: string | null;
+  productName: string;
+  variantLabel: string | null;
+  quantity: number;
+  unitWholesalePrice: number;
+}
+
+export interface ShopOrder {
+  id: string;
+  shopId: string;
+  status: string;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  total: number;
+  items: ShopOrderItem[];
+  shop?: { id: string; name: string };
+}
+
 export interface DashboardStats {
   totals: {
     products: number;

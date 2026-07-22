@@ -96,3 +96,22 @@ export const shopSaleSchema = z.object({
 });
 
 export type ShopSaleInput = z.infer<typeof shopSaleSchema>;
+
+export const shopOrderItemSchema = z.object({
+  productId: z.string().min(1),
+  variantId: z.string().optional().nullable(),
+  quantity: z.coerce.number().int().positive("La quantità deve essere maggiore di 0"),
+});
+
+export const shopOrderCreateSchema = z.object({
+  notes: z.string().trim().optional().nullable(),
+  items: z.array(shopOrderItemSchema).min(1, "Aggiungi almeno un articolo all'ordine"),
+});
+
+export type ShopOrderCreateInput = z.infer<typeof shopOrderCreateSchema>;
+
+export const shopOrderStatusSchema = z.object({
+  status: z.enum(["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"]),
+});
+
+export type ShopOrderStatusInput = z.infer<typeof shopOrderStatusSchema>;

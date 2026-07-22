@@ -9,6 +9,7 @@ const ADMIN_ONLY_PREFIXES = [
   "/catalogo",
   "/stampe",
   "/vendite",
+  "/ordini-negozi",
   "/impostazioni",
   "/negozi",
 ];
