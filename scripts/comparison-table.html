@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: #f1f5f9;
+      padding: 32px;
+      color: #0f172a;
+    }
+    .wrap { max-width: 1400px; margin: 0 auto; }
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #1e1b4b;
+    }
+    .subtitle {
+      font-size: 15px;
+      color: #64748b;
+      margin-bottom: 24px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+      font-size: 13px;
+    }
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 12px 14px;
+      vertical-align: top;
+      text-align: left;
+      line-height: 1.45;
+    }
+    thead th {
+      background: #4f46e5;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    thead th:first-child { width: 18%; }
+    tbody th {
+      background: #f8fafc;
+      font-weight: 600;
+      color: #334155;
+      width: 18%;
+    }
+    .col-pc { background: #eff6ff; }
+    .col-vercel { background: #fef3c7; }
+    .col-vps { background: #ecfdf5; }
+    thead .col-pc { background: #2563eb; }
+    thead .col-vercel { background: #d97706; }
+    thead .col-vps { background: #059669; }
+    .cost {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .cost-pc { color: #2563eb; }
+    .cost-vercel { color: #d97706; }
+    .cost-vps { color: #059669; }
+    ul { padding-left: 16px; margin: 0; }
+    li { margin-bottom: 3px; }
+    .ok { color: #059669; font-weight: 600; }
+    .warn { color: #d97706; font-weight: 600; }
+    .no { color: #dc2626; font-weight: 600; }
+    .footer {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #64748b;
+      text-align: center;
+    }
+    .verdict {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+    .verdict-box {
+      background: #fff;
+      border-radius: 10px;
+      padding: 14px;
+      border: 1px solid #e2e8f0;
+      font-size: 12px;
+    }
+    .verdict-box h3 { font-size: 13px; margin-bottom: 6px; }
+    .v-pc h3 { color: #2563eb; }
+    .v-vercel h3 { color: #d97706; }
+    .v-vps h3 { color: #059669; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>3DPrintSW — Confronto deploy</h1>
+    <p class="subtitle">PC Windows vs Vercel vs VPS + dominio · costi indicativi Italia 2026</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th class="col-pc">PC Windows sempre acceso</th>
+          <th class="col-vercel">Vercel</th>
+          <th class="col-vps">Deploy serio (VPS + dominio)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>Costo mensile</th>
+          <td class="col-pc">
+            <div class="cost cost-pc">0 – 15 €</div>
+            0 € se PC già acceso<br>
+            5–15 € corrente se solo per l'app
+          </td>
+          <td class="col-vercel">
+            <div class="cost cost-vercel">0 – 25 €</div>
+            Piano Hobby 0–20 $<br>
+            Postgres 0 € poi ~10–25 €<br>
+            Storage foto 0–5 €
+          </td>
+          <td class="col-vps">
+            <div class="cost cost-vps">8 – 15 €</div>
+            VPS ~7 € IVA incl.<br>
+            Dominio ~1 €/mese<br>
+            SSL gratis
+          </td>
+        </tr>
+        <tr>
+          <th>Modifiche codice</th>
+          <td class="col-pc"><span class="ok">Nessuna</span></td>
+          <td class="col-vercel"><span class="no">Sì, importanti</span><br>SQLite → Postgres<br>Upload → cloud</td>
+          <td class="col-vps"><span class="ok">Nessuna</span></td>
+        </tr>
+        <tr>
+          <th>Database / foto</th>
+          <td class="col-pc">SQLite + cartella locale ✅</td>
+          <td class="col-vercel">Postgres + Blob obbligatori</td>
+          <td class="col-vps">SQLite + cartella locale ✅</td>
+        </tr>
+        <tr>
+          <th>Affidabilità 24/7</th>
+          <td class="col-pc"><span class="warn">Media</span><br>black-out, update Windows</td>
+          <td class="col-vercel"><span class="ok">Alta</span></td>
+          <td class="col-vps"><span class="ok">Alta</span></td>
+        </tr>
+        <tr>
+          <th>Link pubblico</th>
+          <td class="col-pc">Cloudflare Tunnel (gratis)<br>o port forwarding</td>
+          <td class="col-vercel">Dominio incluso ✅</td>
+          <td class="col-vps">catalogo.tuaazienda.it ✅</td>
+        </tr>
+        <tr>
+          <th>Backup</th>
+          <td class="col-pc"><span class="warn">Manuali</span> (dev.db + uploads)</td>
+          <td class="col-vercel"><span class="ok">Gestiti</span> dal provider</td>
+          <td class="col-vps"><span class="warn">Manuali</span> o script</td>
+        </tr>
+        <tr>
+          <th>Manutenzione</th>
+          <td class="col-pc"><span class="warn">Tu</span> riavvii, backup</td>
+          <td class="col-vercel"><span class="ok">Bassa</span></td>
+          <td class="col-vps"><span class="warn">Media</span></td>
+        </tr>
+        <tr>
+          <th>Ideale per</th>
+          <td class="col-pc"><span class="ok">Iniziare</span> con 1–5 negozi, costo zero</td>
+          <td class="col-vercel">Scalare molto (dopo migration)</td>
+          <td class="col-vps"><span class="ok">Produzione</span> stabile e professionale</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="verdict">
+      <div class="verdict-box v-pc">
+        <h3>✅ PC Windows</h3>
+        Pro: gratis, zero modifiche, setup veloce<br>
+        Contro: meno stabile, backup manuali
+      </div>
+      <div class="verdict-box v-vercel">
+        <h3>⚠️ Vercel</h3>
+        Pro: infrastruttura solida, CDN<br>
+        Contro: serve riscrivere DB e upload
+      </div>
+      <div class="verdict-box v-vps">
+        <h3>✅ VPS + dominio</h3>
+        Pro: stabile, ~10 €/mese, codice uguale<br>
+        Contro: costo fisso, setup iniziale
+      </div>
+    </div>
+
+    <p class="footer">3DPrintSW · Confronto deploy · Luglio 2026</p>
+  </div>
+</body>
+</html>
