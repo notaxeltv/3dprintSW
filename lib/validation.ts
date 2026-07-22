@@ -84,3 +84,15 @@ export const shopMarkupSchema = z.object({
 });
 
 export type ShopMarkupInput = z.infer<typeof shopMarkupSchema>;
+
+export const shopSaleSchema = z.object({
+  productId: z.string().min(1, "Seleziona un modello"),
+  variantId: z.string().optional().nullable(),
+  quantity: z.coerce.number().int().positive("La quantità deve essere maggiore di 0"),
+  unitRetailPrice: z.coerce.number().min(0).optional(),
+  soldAt: z.string().optional(),
+  buyer: z.string().trim().optional().nullable(),
+  notes: z.string().trim().optional().nullable(),
+});
+
+export type ShopSaleInput = z.infer<typeof shopSaleSchema>;

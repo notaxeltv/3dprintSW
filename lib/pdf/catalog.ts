@@ -39,6 +39,13 @@ interface ProductLike {
   variants: VariantLike[];
 }
 
+export interface CatalogPdfOptions {
+  companyName: string;
+  logoUrl: string | null;
+  products: ProductLike[];
+  coverSubtitle?: string;
+}
+
 type RawBlock =
   | { type: "category"; text: string; hasOwnPage: boolean }
   | { type: "subcategory"; text: string }
@@ -186,19 +193,32 @@ async function loadImageBuffer(imageUrl: string | null): Promise<Buffer | null> 
   }
 }
 
-export async function generateCatalogPdf(): Promise<Buffer> {
-  const [settings, products] = await Promise.all([
-    prisma.settings.findUnique({ where: { id: 1 } }),
-    prisma.product.findMany({
-      include: { variants: { orderBy: { order: "asc" } } },
-      orderBy: { name: "asc" },
-    }),
-  ]);
+export async function generateCatalogPdf(options?: CatalogPdfOptions): Promise<Buffer> {
+  let companyName: string;
+  let logoUrl: string | null;
+  let products: ProductLike[];
+  let coverSubtitle: string | undefined;
 
-  const companyName = settings?.companyName || "La mia azienda";
-  const logoUrl = settings?.logoUrl || null;
+  if (options) {
+    companyName = options.companyName;
+    logoUrl = options.logoUrl;
+    products = options.products;
+    coverSubtitle = options.coverSubtitle;
+  } else {
+    const [settings, dbProducts] = await Promise.all([
+      prisma.settings.findUnique({ where: { id: 1 } }),
+      prisma.product.findMany({
+        include: { variants: { orderBy: { order: "asc" } } },
+        orderBy: { name: "asc" },
+      }),
+    ]);
 
-  const { blocks, toc } = buildBlocks(products as ProductLike[]);
+    companyName = settings?.companyName || "La mia azienda";
+    logoUrl = settings?.logoUrl || null;
+    products = dbProducts as ProductLike[];
+  }
+
+  const { blocks, toc } = buildBlocks(products);
 
   const doc = new PDFDocument({ size: "A4", margins: { top: PAGE_MARGIN, bottom: PAGE_MARGIN, left: PAGE_MARGIN, right: PAGE_MARGIN } });
   const chunks: Buffer[] = [];
@@ -252,6 +272,16 @@ export async function generateCatalogPdf(): Promise<Buffer> {
       width: usableWidth,
       align: "center",
     });
+  if (coverSubtitle) {
+    doc
+      .font("Helvetica")
+      .fontSize(14)
+      .fillColor(NAVY_MUTED)
+      .text(coverSubtitle, PAGE_MARGIN, pageHeight / 2 + 76, {
+        width: usableWidth,
+        align: "center",
+      });
+  }
   drawFooter();
 
   // Pagina 2 - indice

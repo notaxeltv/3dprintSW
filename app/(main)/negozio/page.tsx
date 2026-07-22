@@ -1,215 +1,164 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ImageOff, PackageSearch, Ruler, LogOut } from "lucide-react";
-import { formatCurrency } from "@/lib/format";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
+} from "recharts";
+import { ShoppingCart, Wallet, TrendingUp, Package } from "lucide-react";
+import { ShopDashboardStats } from "@/lib/types";
+import { formatCurrency, formatNumber } from "@/lib/format";
 import { Card } from "@/components/ui/Card";
-import Button from "@/components/ui/Button";
-import { Input, Label } from "@/components/ui/Field";
-import type { ShopCatalogItem } from "@/lib/shop";
+import StatCard from "@/components/ui/StatCard";
+import EmptyChart from "@/components/ui/EmptyChart";
 
-export default function NegozioPage() {
+function monthLabel(key: string) {
+  const [year, month] = key.split("-").map(Number);
+  return new Intl.DateTimeFormat("it-IT", { month: "short" }).format(new Date(year, month - 1, 1));
+}
+
+export default function NegozioDashboardPage() {
+  const [stats, setStats] = useState<ShopDashboardStats | null>(null);
   const [shopName, setShopName] = useState<string | null>(null);
-  const [products, setProducts] = useState<ShopCatalogItem[] | null>(null);
-  const [query, setQuery] = useState("");
-  const [savingId, setSavingId] = useState<string | null>(null);
-  const [draftMarkups, setDraftMarkups] = useState<Record<string, string>>({});
-
-  async function load() {
-    const res = await fetch("/api/shop/catalog");
-    if (!res.ok) return;
-    const data = await res.json();
-    setShopName(data.shopName);
-    setProducts(data.products);
-    const drafts: Record<string, string> = {};
-    for (const product of data.products as ShopCatalogItem[]) {
-      drafts[product.id] = product.markupPercent.toString();
-    }
-    setDraftMarkups(drafts);
-  }
 
   useEffect(() => {
-    load();
+    Promise.all([fetch("/api/shop/stats"), fetch("/api/auth/me")]).then(async ([statsRes, meRes]) => {
+      if (statsRes.ok) setStats(await statsRes.json());
+      if (meRes.ok) {
+        const me = await meRes.json();
+        setShopName(me.user?.shopName ?? null);
+      }
+    });
   }, []);
 
-  async function saveMarkup(productId: string) {
-    const markupPercent = Number(draftMarkups[productId] ?? 0);
-    setSavingId(productId);
-    await fetch("/api/shop/markups", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ productId, markupPercent }),
-    });
-    setSavingId(null);
-    load();
+  if (!stats) {
+    return <p className="text-sm text-slate-500">Caricamento dashboard...</p>;
   }
 
-  async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/login";
-  }
-
-  const filtered = products?.filter((p) =>
-    (p.name + " " + (p.category ?? "") + " " + (p.subcategory ?? ""))
-      .toLowerCase()
-      .includes(query.toLowerCase())
+  const { totals, monthly, topSold } = stats;
+  const hasMonthlyData = monthly.some(
+    (m) => m.revenue !== 0 || m.purchases !== 0 || m.sold !== 0
   );
+  const chartData = monthly.map((m) => ({ ...m, label: monthLabel(m.month) }));
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-            Catalogo{shopName ? ` · ${shopName}` : ""}
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Prezzi di acquisto dal fornitore e ricarico che imposti tu per ogni articolo.
-          </p>
-        </div>
-        <Button variant="secondary" onClick={handleLogout}>
-          <LogOut size={16} /> Esci
-        </Button>
+      <div>
+        <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+          Dashboard{shopName ? ` · ${shopName}` : ""}
+        </h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          I tuoi acquisti dal fornitore, le vendite ai clienti e i ricavi.
+        </p>
       </div>
 
-      <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Cerca per nome, categoria o sottocategoria..."
-        className="w-full max-w-sm rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-      />
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard
+          label="Pezzi venduti"
+          value={formatNumber(totals.sold)}
+          icon={<ShoppingCart size={18} />}
+          accent="indigo"
+        />
+        <StatCard
+          label="Ricavi"
+          value={formatCurrency(totals.revenue)}
+          icon={<Wallet size={18} />}
+          accent="emerald"
+          hint="Incassati dai clienti"
+        />
+        <StatCard
+          label="Acquisti"
+          value={formatCurrency(totals.purchases)}
+          icon={<Package size={18} />}
+          accent="amber"
+          hint="Pagati al fornitore"
+        />
+        <StatCard
+          label="Margine"
+          value={formatCurrency(totals.margin)}
+          icon={<TrendingUp size={18} />}
+          accent={totals.margin >= 0 ? "emerald" : "rose"}
+          hint="Ricavi − acquisti"
+        />
+      </div>
 
-      {!products && <p className="text-sm text-slate-500">Caricamento...</p>}
+      <Card className="p-5">
+        <h2 className="mb-4 text-sm font-semibold text-slate-800 dark:text-slate-200">
+          Andamento ultimi 6 mesi
+        </h2>
+        {hasMonthlyData ? (
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis dataKey="label" tick={{ fontSize: 12 }} stroke="#94a3b8" />
+              <YAxis tick={{ fontSize: 12 }} stroke="#94a3b8" />
+              <Tooltip
+                formatter={(value) => formatCurrency(Number(value))}
+                contentStyle={{ borderRadius: 8, fontSize: 13 }}
+              />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              <Bar dataKey="revenue" name="Ricavi" fill="#6366f1" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="purchases" name="Acquisti" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="margin" name="Margine" fill="#10b981" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <EmptyChart message="Registra le tue vendite per vedere l'andamento nel tempo." />
+        )}
+      </Card>
 
-      {products && filtered && filtered.length === 0 && (
-        <Card className="flex flex-col items-center gap-3 py-16 text-center">
-          <PackageSearch className="text-slate-300 dark:text-slate-600" size={40} />
-          <p className="text-sm text-slate-500">
-            {products.length === 0 ? "Nessun articolo nel catalogo." : "Nessun articolo corrisponde alla ricerca."}
-          </p>
-        </Card>
-      )}
-
-      {filtered && filtered.length > 0 && (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {filtered.map((product) => {
-            const markup = Number(draftMarkups[product.id] ?? product.markupPercent);
-            const retailPrice = product.wholesalePrice * (1 + markup / 100);
-
-            return (
-              <Card key={product.id} className="overflow-hidden">
-                <div className="flex flex-col sm:flex-row">
-                  <div className="flex h-40 sm:h-auto sm:w-40 shrink-0 items-center justify-center bg-slate-100 dark:bg-slate-800">
-                    {product.imageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <ImageOff className="text-slate-300 dark:text-slate-600" size={32} />
-                    )}
-                  </div>
-
-                  <div className="flex flex-1 flex-col gap-3 p-4">
-                    <div>
-                      <h2 className="font-medium text-slate-900 dark:text-slate-100">{product.name}</h2>
-                      {(product.category || product.subcategory) && (
-                        <p className="text-xs text-slate-400">
-                          {[product.category, product.subcategory].filter(Boolean).join(" · ")}
-                        </p>
-                      )}
-                      {product.description && (
-                        <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                          {product.description}
-                        </p>
-                      )}
-                    </div>
-
-                    {product.variants.length > 0 ? (
-                      <div>
-                        <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-slate-500">
-                          <Ruler size={13} /> Misure e prezzi
-                        </p>
-                        <ul className="space-y-1 text-sm">
-                          {product.variants.map((variant) => {
-                            const variantRetail =
-                              variant.wholesalePrice * (1 + markup / 100);
-                            return (
-                              <li
-                                key={variant.id}
-                                className="rounded-lg bg-slate-50 px-2 py-1.5 dark:bg-slate-800/60"
-                              >
-                                <div className="flex justify-between gap-2">
-                                  <span className="text-slate-600 dark:text-slate-300">
-                                    {variant.label ? `${variant.label} · ` : ""}
-                                    {variant.height}×{variant.width}×{variant.depth} cm
-                                  </span>
-                                  <span className="font-medium">
-                                    {formatCurrency(variantRetail)}
-                                  </span>
-                                </div>
-                                <p className="text-xs text-slate-400">
-                                  Acquisto: {formatCurrency(variant.wholesalePrice)}
-                                </p>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </div>
-                    ) : (
-                      <div className="text-sm">
-                        <p className="text-slate-500">
-                          Prezzo acquisto:{" "}
-                          <span className="font-medium text-slate-800 dark:text-slate-200">
-                            {formatCurrency(product.wholesalePrice)}
-                          </span>
-                        </p>
-                        <p className="text-slate-500">
-                          Prezzo al cliente:{" "}
-                          <span className="font-semibold text-indigo-600 dark:text-indigo-400">
-                            {formatCurrency(retailPrice)}
-                          </span>
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="mt-auto flex flex-wrap items-end gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
-                      <div className="w-28">
-                        <Label className="text-[11px]">Ricarico %</Label>
-                        <Input
-                          type="number"
-                          step="0.1"
-                          min="0"
-                          value={draftMarkups[product.id] ?? "0"}
-                          onChange={(e) =>
-                            setDraftMarkups((d) => ({ ...d, [product.id]: e.target.value }))
-                          }
-                        />
-                      </div>
-                      <div className="flex-1 min-w-[120px] text-sm">
-                        <p className="text-xs text-slate-400">Prezzo al cliente</p>
-                        <p className="font-semibold text-indigo-600 dark:text-indigo-400">
-                          {product.variants.length > 0
-                            ? "Vedi misure sopra"
-                            : formatCurrency(retailPrice)}
-                        </p>
-                      </div>
-                      <Button
-                        size="sm"
-                        onClick={() => saveMarkup(product.id)}
-                        disabled={savingId === product.id}
-                      >
-                        {savingId === product.id ? "Salvo..." : "Salva ricarico"}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
+      <Card className="overflow-hidden">
+        <div className="px-5 py-4">
+          <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+            Articoli più venduti
+          </h2>
         </div>
-      )}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
+              <tr>
+                <th className="px-5 py-3 font-medium">Modello</th>
+                <th className="px-5 py-3 font-medium">Venduti</th>
+                <th className="px-5 py-3 font-medium">Ricavi</th>
+                <th className="px-5 py-3 font-medium">Acquisti</th>
+                <th className="px-5 py-3 font-medium">Margine</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {topSold.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-5 py-8 text-center text-slate-400 dark:text-slate-500">
+                    Nessuna vendita registrata ancora.
+                  </td>
+                </tr>
+              )}
+              {topSold.map((p) => (
+                <tr key={p.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <td className="px-5 py-3 font-medium text-slate-800 dark:text-slate-200">{p.name}</td>
+                  <td className="px-5 py-3">{formatNumber(p.sold)}</td>
+                  <td className="px-5 py-3">{formatCurrency(p.revenue)}</td>
+                  <td className="px-5 py-3">{formatCurrency(p.purchases)}</td>
+                  <td
+                    className={
+                      p.margin >= 0
+                        ? "px-5 py-3 font-semibold text-emerald-600 dark:text-emerald-400"
+                        : "px-5 py-3 font-semibold text-rose-600 dark:text-rose-400"
+                    }
+                  >
+                    {formatCurrency(p.margin)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
     </div>
   );
 }

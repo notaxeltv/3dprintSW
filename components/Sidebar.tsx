@@ -25,7 +25,11 @@ const adminLinks = [
   { href: "/negozi", label: "Negozi", icon: Store },
 ];
 
-const shopLinks = [{ href: "/negozio", label: "Catalogo", icon: Package }];
+const shopLinks = [
+  { href: "/negozio", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/negozio/catalogo", label: "Catalogo", icon: Package },
+  { href: "/negozio/vendite", label: "Vendite", icon: ShoppingCart },
+];
 
 export default function Sidebar() {
   const pathname = usePathname();

@@ -63,6 +63,40 @@ export interface SaleLog {
   product: { id: string; name: string; imageUrl: string | null };
 }
 
+export interface ShopDashboardStats {
+  totals: {
+    sold: number;
+    revenue: number;
+    purchases: number;
+    margin: number;
+  };
+  monthly: { month: string; revenue: number; purchases: number; margin: number; sold: number }[];
+  topSold: {
+    id: string;
+    name: string;
+    category: string | null;
+    imageUrl: string | null;
+    sold: number;
+    revenue: number;
+    purchases: number;
+    margin: number;
+  }[];
+}
+
+export interface ShopSaleLog {
+  id: string;
+  productId: string;
+  variantId: string | null;
+  quantity: number;
+  unitWholesalePrice: number;
+  unitRetailPrice: number;
+  soldAt: string;
+  buyer: string | null;
+  notes: string | null;
+  product: { id: string; name: string; imageUrl: string | null };
+  variant: { id: string; label: string | null } | null;
+}
+
 export interface DashboardStats {
   totals: {
     products: number;

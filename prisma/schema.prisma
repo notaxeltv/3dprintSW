@@ -27,10 +27,11 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  prints   PrintLog[]
-  sales    SaleLog[]
-  variants ProductVariant[]
-  markups  ShopProductMarkup[]
+  prints    PrintLog[]
+  sales     SaleLog[]
+  variants  ProductVariant[]
+  markups   ShopProductMarkup[]
+  shopSales ShopSaleLog[]
 }
 
 model Shop {
@@ -40,8 +41,9 @@ model Shop {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user    User?
-  markups ShopProductMarkup[]
+  user      User?
+  markups   ShopProductMarkup[]
+  shopSales ShopSaleLog[]
 }
 
 model User {
@@ -76,6 +78,8 @@ model ProductVariant {
   depth     Float
   price     Float
   order     Int     @default(0)
+
+  shopSales ShopSaleLog[]
 }
 
 model Settings {
@@ -105,4 +109,21 @@ model SaleLog {
   buyer     String?
   notes     String?
   createdAt DateTime @default(now())
+}
+
+model ShopSaleLog {
+  id                 String          @id @default(cuid())
+  shopId             String
+  shop               Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  productId          String
+  product            Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId          String?
+  variant            ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  quantity           Int
+  unitWholesalePrice Float
+  unitRetailPrice    Float
+  soldAt             DateTime        @default(now())
+  buyer              String?
+  notes              String?
+  createdAt          DateTime        @default(now())
 }
