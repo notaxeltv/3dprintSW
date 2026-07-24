@@ -51,6 +51,7 @@ export const settingsSchema = z.object({
   xUrl: optionalUrl,
   websiteUrl: optionalUrl,
   email: optionalUrl,
+  pricingMode: z.enum(["MARKUP", "FIXED"]).optional(),
 });
 
 export type SettingsInput = z.infer<typeof settingsSchema>;

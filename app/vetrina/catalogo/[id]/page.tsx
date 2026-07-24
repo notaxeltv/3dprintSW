@@ -4,6 +4,8 @@ import { ArrowLeft } from "lucide-react";
 import ProductGallery from "@/components/vetrina/ProductGallery";
 import { Card } from "@/components/ui/Card";
 import { formatPublicPrice, formatPublicVariantPrice } from "@/lib/public-catalog";
+import { isFixedPricing } from "@/lib/pricing";
+import { getPricingMode } from "@/lib/settings";
 import { getVetrinaProduct } from "@/lib/vetrina-data";
 
 export default async function VetrinaProductPage({
@@ -12,9 +14,11 @@ export default async function VetrinaProductPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const product = await getVetrinaProduct(id);
+  const [product, pricingMode] = await Promise.all([getVetrinaProduct(id), getPricingMode()]);
 
   if (!product) notFound();
+
+  const fixedPricing = isFixedPricing(pricingMode);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
@@ -41,7 +45,9 @@ export default async function VetrinaProductPage({
               {formatPublicPrice(product.priceFrom, product.priceTo)}
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Prezzo indicativo sul sito. I negozi partner possono applicare tariffe diverse ai clienti finali.
+              {fixedPricing
+                ? "Prezzo ufficiale al pubblico, uguale in vetrina e in tutti i negozi partner."
+                : "Prezzo indicativo sul sito. I negozi partner possono applicare tariffe diverse ai clienti finali."}
             </p>
           </div>
 

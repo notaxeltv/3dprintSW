@@ -15,6 +15,17 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
+  const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+  if (settings?.pricingMode === "FIXED") {
+    return NextResponse.json(
+      {
+        error:
+          "Prezzi fissi attivi: il ricarico è impostato dal fornitore e non può essere modificato.",
+      },
+      { status: 403 }
+    );
+  }
+
   const product = await prisma.product.findUnique({
     where: { id: parsed.data.productId },
   });

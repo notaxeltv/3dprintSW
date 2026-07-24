@@ -36,17 +36,17 @@ export default function ShopSaleForm({ products, onSaved }: Props) {
     if (hasVariants) {
       const firstVariant = selected.variants[0];
       setVariantId(firstVariant?.id ?? "");
-      setUnitRetailPrice(firstVariant?.retailPrice.toString() ?? "");
+      setUnitRetailPrice(firstVariant?.retailPrice?.toString() ?? firstVariant?.wholesalePrice.toString() ?? "");
     } else {
       setVariantId("");
-      setUnitRetailPrice(selected.retailPrice.toString());
+      setUnitRetailPrice(selected.retailPrice?.toString() ?? selected.wholesalePrice.toString());
     }
   }, [productId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!selected || !hasVariants || !variantId) return;
     const variant = selected.variants.find((v) => v.id === variantId);
-    if (variant) setUnitRetailPrice(variant.retailPrice.toString());
+    if (variant) setUnitRetailPrice(variant.retailPrice?.toString() ?? variant.wholesalePrice.toString());
   }, [variantId, selected, hasVariants]);
 
   async function handleSubmit(e: FormEvent) {
@@ -119,7 +119,7 @@ export default function ShopSaleForm({ products, onSaved }: Props) {
             {selected.variants.map((v) => (
               <option key={v.id} value={v.id}>
                 {v.label ? `${v.label} · ` : ""}
-                {v.height}×{v.width}×{v.depth} cm · {v.retailPrice.toFixed(2)} €
+                {v.height}×{v.width}×{v.depth} cm · {(v.retailPrice ?? v.wholesalePrice).toFixed(2)} €
               </option>
             ))}
           </Select>
