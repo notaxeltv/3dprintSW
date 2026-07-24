@@ -11,7 +11,6 @@ export async function GET() {
   const catalog = await getShopCatalogProducts(session.shopId);
   return NextResponse.json({
     shopName: session.shopName ?? catalog.shopName,
-    pricingMode: catalog.pricingMode,
     products: catalog.products,
   });
 }

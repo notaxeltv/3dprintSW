@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { Save, Building2, Share2, BadgePercent } from "lucide-react";
+import { Save, Building2, Share2 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Field";
@@ -14,13 +14,11 @@ import {
   type SocialLinkKey,
 } from "@/lib/social";
 import type { Settings } from "@/lib/types";
-import { PRICING_MODES, type PricingMode } from "@/lib/pricing";
 
 export default function ImpostazioniPage() {
   const [companyName, setCompanyName] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [socialLinks, setSocialLinks] = useState(emptySocialLinks());
-  const [pricingMode, setPricingMode] = useState<PricingMode>("MARKUP");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -33,7 +31,6 @@ export default function ImpostazioniPage() {
         setCompanyName(data.companyName ?? "");
         setLogoUrl(data.logoUrl ?? "");
         setSocialLinks(socialLinksFromSettings(data));
-        setPricingMode(data.pricingMode === "FIXED" ? "FIXED" : "MARKUP");
         setLoading(false);
       });
   }, []);
@@ -51,7 +48,7 @@ export default function ImpostazioniPage() {
       const res = await fetch("/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ companyName, logoUrl, pricingMode, ...socialLinks }),
+        body: JSON.stringify({ companyName, logoUrl, ...socialLinks }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -108,50 +105,6 @@ export default function ImpostazioniPage() {
               </div>
 
               <ImageUploadField label="Logo azienda" value={logoUrl} onChange={setLogoUrl} />
-            </div>
-
-            <div className="border-t border-slate-200 pt-6 dark:border-slate-800">
-              <h2 className="mb-1 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200">
-                <BadgePercent size={16} className="text-indigo-600 dark:text-indigo-400" /> Politica prezzi
-              </h2>
-              <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
-                Scegli se lasciare ai negozi un ricarico libero o imporre un prezzo al pubblico uguale per tutti (modello Apple).
-              </p>
-              <div className="space-y-3">
-                {PRICING_MODES.map((mode) => (
-                  <label
-                    key={mode.value}
-                    className={`flex cursor-pointer gap-3 rounded-xl border p-4 transition ${
-                      pricingMode === mode.value
-                        ? "border-indigo-500 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-500/10"
-                        : "border-slate-200 hover:border-slate-300 dark:border-slate-700"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="pricingMode"
-                      value={mode.value}
-                      checked={pricingMode === mode.value}
-                      onChange={() => setPricingMode(mode.value)}
-                      className="mt-1"
-                    />
-                    <span>
-                      <span className="block text-sm font-semibold text-slate-900 dark:text-slate-100">
-                        {mode.label}
-                      </span>
-                      <span className="mt-1 block text-sm text-slate-500 dark:text-slate-400">
-                        {mode.description}
-                      </span>
-                    </span>
-                  </label>
-                ))}
-              </div>
-              {pricingMode === "FIXED" && (
-                <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:bg-amber-950 dark:text-amber-200">
-                  In modalità prezzo fisso, imposta il <strong>Prezzo al pubblico</strong> su ogni articolo nel catalogo admin.
-                  Vetrina e negozi mostreranno lo stesso importo; il margine del negozio sarà automatico (prezzo fisso − prezzo acquisto).
-                </p>
-              )}
             </div>
 
             <div className="border-t border-slate-200 pt-6 dark:border-slate-800">

@@ -108,4 +108,3 @@ export async function requireShop() {
   return session;
 }
 
-export { applyMarkup } from "@/lib/pricing";

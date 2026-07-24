@@ -30,7 +30,6 @@ export async function PUT(request: NextRequest) {
     data: {
       companyName: parsed.data.companyName,
       logoUrl: parsed.data.logoUrl || null,
-      pricingMode: parsed.data.pricingMode ?? undefined,
       ...social,
     },
   });

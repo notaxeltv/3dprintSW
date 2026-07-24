@@ -111,7 +111,6 @@ model Settings {
   xUrl         String?
   websiteUrl   String?
   email        String?
-  pricingMode  String  @default("MARKUP")
 }
 
 model PrintLog {

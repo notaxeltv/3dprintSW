@@ -61,7 +61,6 @@ export interface Settings {
   xUrl?: string | null;
   websiteUrl?: string | null;
   email?: string | null;
-  pricingMode?: "MARKUP" | "FIXED";
 }
 
 export interface PrintLog {

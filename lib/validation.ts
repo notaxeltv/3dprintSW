@@ -28,7 +28,7 @@ export const productSchema = z.object({
   printHours: z.coerce.number().min(0).optional().nullable(),
   costPerUnit: z.coerce.number().min(0, "Il costo non può essere negativo"),
   price: z.coerce.number().min(0, "Il prezzo non può essere negativo"),
-  publicPrice: z.coerce.number().min(0).optional().nullable(),
+  publicPrice: z.coerce.number().min(0, "Il prezzo al pubblico è obbligatorio"),
   minStock: z.coerce.number().int().min(0).optional(),
   variants: z.array(productVariantSchema).optional(),
   images: z.array(productImageSchema).optional(),
@@ -51,7 +51,6 @@ export const settingsSchema = z.object({
   xUrl: optionalUrl,
   websiteUrl: optionalUrl,
   email: optionalUrl,
-  pricingMode: z.enum(["MARKUP", "FIXED"]).optional(),
 });
 
 export type SettingsInput = z.infer<typeof settingsSchema>;

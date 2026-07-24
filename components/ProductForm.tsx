@@ -1,13 +1,12 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { Plus, Trash2, Ruler } from "lucide-react";
 import { Product } from "@/lib/types";
 import Button from "./ui/Button";
 import { Input, Label, Textarea, FieldError } from "./ui/Field";
 import ImageUploadField from "./ImageUploadField";
 import ProductGalleryField, { type GalleryImageInput } from "./ProductGalleryField";
-import type { PricingMode } from "@/lib/pricing";
 
 interface Props {
   product?: Product | null;
@@ -65,16 +64,6 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const [pricingMode, setPricingMode] = useState<PricingMode>("MARKUP");
-
-  useEffect(() => {
-    fetch("/api/settings")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => setPricingMode(data?.pricingMode === "FIXED" ? "FIXED" : "MARKUP"))
-      .catch(() => setPricingMode("MARKUP"));
-  }, []);
-
-  const isFixedPricing = pricingMode === "FIXED";
 
   const update = (key: keyof typeof form) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -121,7 +110,7 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
       printHours: form.printHours === "" ? null : Number(form.printHours),
       costPerUnit: Number(form.costPerUnit),
       price: Number(form.price),
-      publicPrice: form.publicPrice === "" ? null : Number(form.publicPrice),
+      publicPrice: form.publicPrice === "" ? 0 : Number(form.publicPrice),
       minStock: Number(form.minStock),
       variants: validVariants,
       images: galleryPayload,
@@ -250,19 +239,10 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
       </div>
 
       <div className="rounded-lg border border-indigo-100 bg-indigo-50/70 px-3 py-2 text-xs text-indigo-900 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-200">
-        <strong>Prezzo al negozio</strong>: quanto pagano i negozi partner (ordini e area negozio).
+        <strong>Prezzo al negozio</strong>: quanto pagano i negozi partner quando ordinano da te.
         <br />
-        {isFixedPricing ? (
-          <>
-            <strong>Prezzo al pubblico</strong>: prezzo fisso imposto da te (vetrina + tutti i negozi, stile Apple).
-            Il margine del negozio è calcolato automaticamente.
-          </>
-        ) : (
-          <>
-            <strong>Prezzo vetrina</strong>: quanto mostri sul sito pubblico. I negozi applicano il proprio ricarico
-            ai clienti finali.
-          </>
-        )}
+        <strong>Prezzo al pubblico</strong>: prezzo ufficiale che decidi tu — uguale in vetrina e in tutti i negozi.
+        Il margine del negozio è automatico (prezzo al pubblico − prezzo al negozio).
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -293,9 +273,7 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
           <FieldError>{errors.price?.[0]}</FieldError>
         </div>
         <div>
-          <Label htmlFor="publicPrice">
-            {isFixedPricing ? "Prezzo al pubblico (fisso) *" : "Prezzo vetrina (€)"}
-          </Label>
+          <Label htmlFor="publicPrice">Prezzo al pubblico (€) *</Label>
           <Input
             id="publicPrice"
             type="number"
@@ -303,13 +281,11 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
             min="0"
             value={form.publicPrice}
             onChange={update("publicPrice")}
-            placeholder={isFixedPricing ? "Es. 24,90" : "Es. 24,90"}
-            required={isFixedPricing}
+            placeholder="Es. 24,90"
+            required
           />
           <p className="mt-1 text-xs text-slate-400">
-            {isFixedPricing
-              ? "Obbligatorio in modalità prezzo fisso: stesso prezzo in vetrina e per tutti i negozi."
-              : "Facoltativo. Se vuoto: «Prezzo su richiesta» in vetrina."}
+            Stesso prezzo in vetrina e per tutti i negozi partner.
           </p>
           <FieldError>{errors.publicPrice?.[0]}</FieldError>
         </div>
@@ -327,8 +303,7 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
 
         {variants.length === 0 && (
           <p className="text-xs text-slate-400">
-            Facoltativo: aggiungi misure con prezzo negozio e
-            {isFixedPricing ? " prezzo al pubblico per misura." : " prezzo vetrina, se diverso."}
+            Facoltativo: aggiungi misure con prezzo negozio e, se diverso, prezzo al pubblico per misura.
           </p>
         )}
 
@@ -384,11 +359,7 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
                 />
               </div>
               <div className="col-span-5 sm:col-span-1">
-                {index === 0 && (
-                  <Label className="text-[11px]">
-                    {isFixedPricing ? "Pubblico (€)" : "Vetrina (€)"}
-                  </Label>
-                )}
+                {index === 0 && <Label className="text-[11px]">Pubblico (€)</Label>}
                 <Input
                   type="number"
                   step="0.01"

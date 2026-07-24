@@ -1,45 +1,30 @@
 import {
   computeMarginPercent,
-  normalizePricingMode,
-  resolveRetailPrice,
-  resolveVariantRetailPrice,
-  type PricingMode,
+  resolvePublicRetailPrice,
+  resolveVariantPublicRetailPrice,
 } from "@/lib/pricing";
 import { prisma } from "@/lib/prisma";
 
-export function shopCatalogItem(
-  product: {
+export function shopCatalogItem(product: {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string | null;
+  subcategory: string | null;
+  imageUrl: string | null;
+  price: number;
+  publicPrice: number | null;
+  variants: {
     id: string;
-    name: string;
-    description: string | null;
-    category: string | null;
-    subcategory: string | null;
-    imageUrl: string | null;
+    label: string | null;
+    height: number;
+    width: number;
+    depth: number;
     price: number;
     publicPrice: number | null;
-    variants: {
-      id: string;
-      label: string | null;
-      height: number;
-      width: number;
-      depth: number;
-      price: number;
-      publicPrice: number | null;
-    }[];
-  },
-  markupPercent: number,
-  pricingMode: PricingMode
-) {
-  const retailPrice = resolveRetailPrice(
-    product.price,
-    product.publicPrice,
-    markupPercent,
-    pricingMode
-  );
-  const effectiveMarkup =
-    pricingMode === "FIXED"
-      ? (computeMarginPercent(product.price, retailPrice) ?? 0)
-      : markupPercent;
+  }[];
+}) {
+  const retailPrice = resolvePublicRetailPrice(product.publicPrice);
 
   return {
     id: product.id,
@@ -49,9 +34,8 @@ export function shopCatalogItem(
     subcategory: product.subcategory,
     imageUrl: product.imageUrl,
     wholesalePrice: product.price,
-    markupPercent: effectiveMarkup,
+    marginPercent: computeMarginPercent(product.price, retailPrice) ?? 0,
     retailPrice,
-    pricingMode,
     variants: product.variants.map((variant) => ({
       id: variant.id,
       label: variant.label,
@@ -59,13 +43,7 @@ export function shopCatalogItem(
       width: variant.width,
       depth: variant.depth,
       wholesalePrice: variant.price,
-      retailPrice: resolveVariantRetailPrice(
-        variant.price,
-        variant.publicPrice,
-        product.publicPrice,
-        markupPercent,
-        pricingMode
-      ),
+      retailPrice: resolveVariantPublicRetailPrice(variant.publicPrice, product.publicPrice),
     })),
   };
 }
@@ -73,26 +51,17 @@ export function shopCatalogItem(
 export type ShopCatalogItem = ReturnType<typeof shopCatalogItem>;
 
 export async function getShopCatalogProducts(shopId: string) {
-  const [products, markups, shop, settings] = await Promise.all([
+  const [products, shop] = await Promise.all([
     prisma.product.findMany({
       orderBy: [{ category: "asc" }, { subcategory: "asc" }, { name: "asc" }],
       include: { variants: { orderBy: { order: "asc" } } },
     }),
-    prisma.shopProductMarkup.findMany({ where: { shopId } }),
     prisma.shop.findUnique({ where: { id: shopId }, select: { name: true } }),
-    prisma.settings.findUnique({ where: { id: 1 } }),
   ]);
-
-  const pricingMode = normalizePricingMode(settings?.pricingMode);
-  const markupByProduct = new Map(markups.map((m) => [m.productId, m.markupPercent]));
-  const catalog = products.map((product) =>
-    shopCatalogItem(product, markupByProduct.get(product.id) ?? 0, pricingMode)
-  );
 
   return {
     shopName: shop?.name ?? null,
-    pricingMode,
-    products: catalog,
+    products: products.map(shopCatalogItem),
   };
 }
 

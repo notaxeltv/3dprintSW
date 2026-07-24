@@ -4,7 +4,6 @@ import { prisma } from "@/lib/prisma";
 
 export type { SessionUser, UserRole } from "@/lib/session";
 export {
-  applyMarkup,
   clearSessionCookie,
   createSessionToken,
   getSession,

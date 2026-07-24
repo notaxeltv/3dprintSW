@@ -55,7 +55,7 @@ export async function PUT(
           printHours: parsed.data.printHours ?? null,
           costPerUnit: parsed.data.costPerUnit,
           price: parsed.data.price,
-          publicPrice: parsed.data.publicPrice ?? null,
+          publicPrice: parsed.data.publicPrice,
           minStock: parsed.data.minStock ?? 0,
           variants: parsed.data.variants?.length
             ? {

@@ -3,63 +3,33 @@
 import { useEffect, useState } from "react";
 import { ImageOff, Lock, PackageSearch, Ruler, FileDown } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
-import { pricingModeLabel, type PricingMode } from "@/lib/pricing";
 import { Card } from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
-import { Input, Label } from "@/components/ui/Field";
 import type { ShopCatalogItem } from "@/lib/shop";
 
 function formatRetailPrice(value: number | null) {
-  if (value == null) return "Prezzo da definire";
+  if (value == null) return "Prezzo non impostato";
   return formatCurrency(value);
 }
 
 export default function NegozioPage() {
   const [shopName, setShopName] = useState<string | null>(null);
-  const [pricingMode, setPricingMode] = useState<PricingMode>("MARKUP");
   const [products, setProducts] = useState<ShopCatalogItem[] | null>(null);
   const [query, setQuery] = useState("");
-  const [savingId, setSavingId] = useState<string | null>(null);
-  const [draftMarkups, setDraftMarkups] = useState<Record<string, string>>({});
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
-
-  const isFixedPricing = pricingMode === "FIXED";
 
   async function load() {
     const res = await fetch("/api/shop/catalog");
     if (!res.ok) return;
     const data = await res.json();
     setShopName(data.shopName);
-    setPricingMode(data.pricingMode === "FIXED" ? "FIXED" : "MARKUP");
     setProducts(data.products);
-    const drafts: Record<string, string> = {};
-    for (const product of data.products as ShopCatalogItem[]) {
-      drafts[product.id] = product.markupPercent.toString();
-    }
-    setDraftMarkups(drafts);
   }
 
   useEffect(() => {
     load();
   }, []);
-
-  async function saveMarkup(productId: string) {
-    const markupPercent = Number(draftMarkups[productId] ?? 0);
-    setSavingId(productId);
-    const res = await fetch("/api/shop/markups", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ productId, markupPercent }),
-    });
-    setSavingId(null);
-    if (!res.ok) {
-      const data = await res.json();
-      alert(typeof data.error === "string" ? data.error : "Impossibile salvare il ricarico.");
-      return;
-    }
-    load();
-  }
 
   async function handleExportPdf() {
     setExporting(true);
@@ -100,29 +70,21 @@ export default function NegozioPage() {
             Catalogo{shopName ? ` · ${shopName}` : ""}
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            {isFixedPricing
-              ? "Prezzi al cliente fissati dal fornitore. Vedi il tuo prezzo di acquisto e il margine automatico."
-              : "Prezzi di acquisto dal fornitore, ricarico per articolo ed export PDF con i tuoi prezzi al cliente."}
+            Prezzi al cliente fissati dal fornitore. Vedi il tuo prezzo di acquisto e il margine automatico.
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="secondary" onClick={handleExportPdf} disabled={exporting}>
-            <FileDown size={16} /> {exporting ? "Generazione..." : "Esporta PDF"}
-          </Button>
-        </div>
+        <Button variant="secondary" onClick={handleExportPdf} disabled={exporting}>
+          <FileDown size={16} /> {exporting ? "Generazione..." : "Esporta PDF"}
+        </Button>
       </div>
 
-      {isFixedPricing && (
-        <div className="flex items-start gap-3 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-900 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-200">
-          <Lock size={18} className="mt-0.5 shrink-0" />
-          <div>
-            <p className="font-semibold">Prezzi fissi attivi ({pricingModeLabel("FIXED")})</p>
-            <p className="mt-1 text-indigo-800/90 dark:text-indigo-100/90">
-              Non puoi modificare il prezzo al cliente: è lo stesso in vetrina e in tutti i negozi partner.
-            </p>
-          </div>
-        </div>
-      )}
+      <div className="flex items-start gap-3 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-900 dark:border-indigo-500/30 dark:bg-indigo-500/10 dark:text-indigo-200">
+        <Lock size={18} className="mt-0.5 shrink-0" />
+        <p>
+          Il <strong>prezzo al cliente</strong> è deciso dal fornitore ed è uguale in vetrina e in tutti i negozi.
+          Non puoi modificarlo: vedi solo quanto paghi e il tuo margine.
+        </p>
+      </div>
 
       {exportError && (
         <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
@@ -156,11 +118,7 @@ export default function NegozioPage() {
                 <div className="flex h-40 sm:h-auto sm:w-40 shrink-0 items-center justify-center bg-slate-100 dark:bg-slate-800">
                   {product.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className="h-full w-full object-cover"
-                    />
+                    <img src={product.imageUrl} alt={product.name} className="h-full w-full object-cover" />
                   ) : (
                     <ImageOff className="text-slate-300 dark:text-slate-600" size={32} />
                   )}
@@ -175,9 +133,7 @@ export default function NegozioPage() {
                       </p>
                     )}
                     {product.description && (
-                      <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                        {product.description}
-                      </p>
+                      <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{product.description}</p>
                     )}
                   </div>
 
@@ -197,14 +153,12 @@ export default function NegozioPage() {
                                 {variant.label ? `${variant.label} · ` : ""}
                                 {variant.height}×{variant.width}×{variant.depth} cm
                               </span>
-                              <span className="font-medium">
-                                {formatRetailPrice(variant.retailPrice)}
-                              </span>
+                              <span className="font-medium">{formatRetailPrice(variant.retailPrice)}</span>
                             </div>
                             <p className="text-xs text-slate-400">
                               Acquisto: {formatCurrency(variant.wholesalePrice)}
-                              {isFixedPricing && variant.retailPrice != null && (
-                                <> · Margine: {product.markupPercent.toFixed(1)}%</>
+                              {variant.retailPrice != null && (
+                                <> · Margine: {product.marginPercent.toFixed(1)}%</>
                               )}
                             </p>
                           </li>
@@ -225,50 +179,11 @@ export default function NegozioPage() {
                           {formatRetailPrice(product.retailPrice)}
                         </span>
                       </p>
-                      {isFixedPricing && product.retailPrice != null && (
+                      {product.retailPrice != null && (
                         <p className="text-xs text-slate-400">
-                          Margine automatico: {product.markupPercent.toFixed(1)}%
+                          Margine: {product.marginPercent.toFixed(1)}%
                         </p>
                       )}
-                    </div>
-                  )}
-
-                  {!isFixedPricing ? (
-                    <div className="mt-auto flex flex-wrap items-end gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
-                      <div className="w-28">
-                        <Label className="text-[11px]">Ricarico %</Label>
-                        <Input
-                          type="number"
-                          step="0.1"
-                          min="0"
-                          value={draftMarkups[product.id] ?? "0"}
-                          onChange={(e) =>
-                            setDraftMarkups((d) => ({ ...d, [product.id]: e.target.value }))
-                          }
-                        />
-                      </div>
-                      <div className="flex-1 min-w-[120px] text-sm">
-                        <p className="text-xs text-slate-400">Prezzo al cliente</p>
-                        <p className="font-semibold text-indigo-600 dark:text-indigo-400">
-                          {product.variants.length > 0
-                            ? "Vedi misure sopra"
-                            : formatRetailPrice(
-                                product.wholesalePrice *
-                                  (1 + Number(draftMarkups[product.id] ?? product.markupPercent) / 100)
-                              )}
-                        </p>
-                      </div>
-                      <Button
-                        size="sm"
-                        onClick={() => saveMarkup(product.id)}
-                        disabled={savingId === product.id}
-                      >
-                        {savingId === product.id ? "Salvo..." : "Salva ricarico"}
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="mt-auto border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                      Prezzo al cliente bloccato dal fornitore
                     </div>
                   )}
                 </div>
