@@ -51,6 +51,9 @@ export const settingsSchema = z.object({
   xUrl: optionalUrl,
   websiteUrl: optionalUrl,
   email: optionalUrl,
+  siteDescription: z.string().trim().optional().nullable(),
+  legalAddress: z.string().trim().optional().nullable(),
+  vatNumber: z.string().trim().optional().nullable(),
 });
 
 export type SettingsInput = z.infer<typeof settingsSchema>;

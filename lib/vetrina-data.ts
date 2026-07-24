@@ -22,6 +22,9 @@ export async function getVetrinaSettings() {
     xUrl: settings.xUrl,
     websiteUrl: settings.websiteUrl,
     email: settings.email,
+    siteDescription: settings.siteDescription,
+    legalAddress: settings.legalAddress,
+    vatNumber: settings.vatNumber,
   };
 }
 

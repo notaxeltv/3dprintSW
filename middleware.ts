@@ -56,7 +56,9 @@ function isVetrinaPage(pathname: string) {
     pathname === "/" ||
     pathname.startsWith("/vetrina") ||
     pathname === "/catalogo" ||
-    pathname.startsWith("/catalogo/")
+    pathname.startsWith("/catalogo/") ||
+    pathname === "/privacy" ||
+    pathname === "/cookie"
   );
 }
 
@@ -129,6 +131,14 @@ async function handleVetrinaRequest(request: NextRequest) {
 
   if (pathname === "/catalogo" || pathname.startsWith("/catalogo/")) {
     return NextResponse.rewrite(new URL(`/vetrina${pathname}`, request.url));
+  }
+
+  if (pathname === "/privacy") {
+    return NextResponse.rewrite(new URL("/vetrina/privacy", request.url));
+  }
+
+  if (pathname === "/cookie") {
+    return NextResponse.rewrite(new URL("/vetrina/cookie", request.url));
   }
 
   return NextResponse.next();

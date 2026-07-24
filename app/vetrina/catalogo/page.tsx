@@ -1,5 +1,16 @@
+import type { Metadata } from "next";
 import ProductCard from "@/components/vetrina/ProductCard";
-import { getVetrinaCategories, getVetrinaProducts } from "@/lib/vetrina-data";
+import { buildVetrinaMetadata } from "@/lib/seo";
+import { getVetrinaCategories, getVetrinaProducts, getVetrinaSettings } from "@/lib/vetrina-data";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getVetrinaSettings();
+  return buildVetrinaMetadata({
+    title: "Catalogo",
+    description: `Catalogo completo stampe 3D di ${settings.companyName}.`,
+    path: "/catalogo",
+  });
+}
 
 export default async function VetrinaCatalogPage({
   searchParams,

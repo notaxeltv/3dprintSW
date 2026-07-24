@@ -1,10 +1,29 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import ProductGallery from "@/components/vetrina/ProductGallery";
 import { Card } from "@/components/ui/Card";
 import { formatPublicPrice, formatPublicVariantPrice } from "@/lib/public-catalog";
+import { buildVetrinaMetadata } from "@/lib/seo";
 import { getVetrinaProduct } from "@/lib/vetrina-data";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const product = await getVetrinaProduct(id);
+  if (!product) return { title: "Prodotto non trovato" };
+
+  return buildVetrinaMetadata({
+    title: product.name,
+    description: product.description || `Modello 3D ${product.name} disponibile nel catalogo.`,
+    path: `/catalogo/${id}`,
+    image: product.coverImage,
+  });
+}
 
 export default async function VetrinaProductPage({
   params,

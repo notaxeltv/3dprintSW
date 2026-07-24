@@ -31,6 +31,9 @@ export async function PUT(request: NextRequest) {
       companyName: parsed.data.companyName,
       logoUrl: parsed.data.logoUrl || null,
       ...social,
+      siteDescription: parsed.data.siteDescription || null,
+      legalAddress: parsed.data.legalAddress || null,
+      vatNumber: parsed.data.vatNumber || null,
     },
   });
 

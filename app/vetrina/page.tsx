@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import ProductCard from "@/components/vetrina/ProductCard";
+import VetrinaJsonLd from "@/components/vetrina/VetrinaJsonLd";
 import Button from "@/components/ui/Button";
 import { getDashboardLoginUrl } from "@/lib/domains";
 import { getVetrinaProducts, getVetrinaSettings } from "@/lib/vetrina-data";
@@ -11,6 +12,7 @@ export default async function VetrinaHomePage() {
 
   return (
     <div>
+      <VetrinaJsonLd />
       <section className="border-b border-slate-200 bg-gradient-to-br from-indigo-50 via-white to-slate-50 dark:border-slate-800 dark:from-indigo-950/40 dark:via-slate-950 dark:to-slate-950">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-20">
           <div className="space-y-5">

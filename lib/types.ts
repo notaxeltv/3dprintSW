@@ -61,6 +61,9 @@ export interface Settings {
   xUrl?: string | null;
   websiteUrl?: string | null;
   email?: string | null;
+  siteDescription?: string | null;
+  legalAddress?: string | null;
+  vatNumber?: string | null;
 }
 
 export interface PrintLog {

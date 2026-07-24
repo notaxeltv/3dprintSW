@@ -109,8 +109,11 @@ model Settings {
   telegramUrl  String?
   linkedinUrl  String?
   xUrl         String?
-  websiteUrl   String?
-  email        String?
+  websiteUrl      String?
+  email           String?
+  siteDescription String?
+  legalAddress    String?
+  vatNumber       String?
 }
 
 model PrintLog {
