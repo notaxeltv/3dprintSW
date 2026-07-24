@@ -6,6 +6,7 @@ import { Product } from "@/lib/types";
 import Button from "./ui/Button";
 import { Input, Label, Textarea, FieldError } from "./ui/Field";
 import ImageUploadField from "./ImageUploadField";
+import ProductGalleryField, { type GalleryImageInput } from "./ProductGalleryField";
 
 interface Props {
   product?: Product | null;
@@ -49,6 +50,14 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
         }))
       : []
   );
+  const [gallery, setGallery] = useState<GalleryImageInput[]>(
+    product?.images?.length
+      ? product.images.map((image) => ({
+          url: image.url,
+          caption: image.caption ?? "",
+        }))
+      : []
+  );
   const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -85,6 +94,13 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
         price: Number(v.price || 0),
       }));
 
+    const galleryPayload = gallery
+      .filter((image) => image.url.trim() !== "")
+      .map((image) => ({
+        url: image.url.trim(),
+        caption: image.caption.trim() || null,
+      }));
+
     const payload = {
       ...form,
       printHours: form.printHours === "" ? null : Number(form.printHours),
@@ -92,6 +108,8 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
       price: Number(form.price),
       minStock: Number(form.minStock),
       variants: validVariants,
+      images: galleryPayload,
+      imageUrl: form.imageUrl || galleryPayload[0]?.url || "",
     };
 
     try {
@@ -188,6 +206,8 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
         value={form.imageUrl}
         onChange={(url) => setForm((f) => ({ ...f, imageUrl: url }))}
       />
+
+      <ProductGalleryField value={gallery} onChange={setGallery} />
 
       <div className="grid grid-cols-2 gap-4">
         <div>

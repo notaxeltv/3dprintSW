@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionFromRequest } from "@/lib/session";
+import { getAppOrigin, isAppHost } from "@/lib/domains";
 
 const PUBLIC_PATHS = ["/login"];
-const PUBLIC_API_PREFIXES = ["/api/auth/login", "/api/settings/public"];
+const PUBLIC_API_PREFIXES = [
+  "/api/auth/login",
+  "/api/settings/public",
+  "/api/catalog/public",
+];
 
 const ADMIN_ONLY_PREFIXES = [
   "/",
@@ -42,21 +47,28 @@ function isShopPath(pathname: string) {
 function isAdminApi(pathname: string) {
   if (pathname.startsWith("/api/auth")) return false;
   if (pathname.startsWith("/api/shop")) return false;
+  if (pathname.startsWith("/api/catalog/public")) return false;
   return pathname.startsWith("/api/");
 }
 
-export async function middleware(request: NextRequest) {
+function isVetrinaPage(pathname: string) {
+  return (
+    pathname === "/" ||
+    pathname.startsWith("/vetrina") ||
+    pathname === "/catalogo" ||
+    pathname.startsWith("/catalogo/")
+  );
+}
+
+function redirectToApp(request: NextRequest, pathname: string) {
+  const appOrigin = getAppOrigin(request.headers.get("host"));
+  const url = new URL(pathname, appOrigin);
+  url.search = request.nextUrl.search;
+  return NextResponse.redirect(url);
+}
+
+async function handleDashboardRequest(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/uploads") ||
-    pathname.includes(".") ||
-    pathname === "/manifest.webmanifest"
-  ) {
-    return NextResponse.next();
-  }
-
   const session = await getSessionFromRequest(request);
 
   if (isPublicPath(pathname)) {
@@ -95,6 +107,56 @@ export async function middleware(request: NextRequest) {
   }
 
   return NextResponse.next();
+}
+
+async function handleVetrinaRequest(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (pathname.startsWith("/api/")) {
+    if (isPublicApi(pathname)) {
+      return NextResponse.next();
+    }
+    return NextResponse.json({ error: "Non autorizzato" }, { status: 401 });
+  }
+
+  if (!isVetrinaPage(pathname)) {
+    return redirectToApp(request, pathname);
+  }
+
+  if (pathname === "/") {
+    return NextResponse.rewrite(new URL("/vetrina", request.url));
+  }
+
+  if (pathname === "/catalogo" || pathname.startsWith("/catalogo/")) {
+    return NextResponse.rewrite(new URL(`/vetrina${pathname}`, request.url));
+  }
+
+  return NextResponse.next();
+}
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/uploads") ||
+    pathname.includes(".") ||
+    pathname === "/manifest.webmanifest"
+  ) {
+    return NextResponse.next();
+  }
+
+  const host = request.headers.get("host");
+  const onAppHost = isAppHost(host);
+
+  if (onAppHost) {
+    if (pathname.startsWith("/vetrina")) {
+      return NextResponse.next();
+    }
+    return handleDashboardRequest(request);
+  }
+
+  return handleVetrinaRequest(request);
 }
 
 export const config = {

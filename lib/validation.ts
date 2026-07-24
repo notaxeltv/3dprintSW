@@ -10,6 +10,13 @@ export const productVariantSchema = z.object({
 
 export type ProductVariantInput = z.infer<typeof productVariantSchema>;
 
+export const productImageSchema = z.object({
+  url: z.string().trim().min(1, "URL immagine obbligatoria"),
+  caption: z.string().trim().optional().nullable(),
+});
+
+export type ProductImageInput = z.infer<typeof productImageSchema>;
+
 export const productSchema = z.object({
   name: z.string().trim().min(1, "Il nome è obbligatorio"),
   description: z.string().trim().optional().nullable(),
@@ -22,6 +29,7 @@ export const productSchema = z.object({
   price: z.coerce.number().min(0, "Il prezzo non può essere negativo"),
   minStock: z.coerce.number().int().min(0).optional(),
   variants: z.array(productVariantSchema).optional(),
+  images: z.array(productImageSchema).optional(),
 });
 
 export type ProductInput = z.infer<typeof productSchema>;

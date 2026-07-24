@@ -19,6 +19,14 @@ export interface ProductVariant {
   order: number;
 }
 
+export interface ProductImage {
+  id: string;
+  productId: string;
+  url: string;
+  caption: string | null;
+  order: number;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -35,6 +43,7 @@ export interface Product {
   updatedAt: string;
   stats: ProductStats;
   variants?: ProductVariant[];
+  images?: ProductImage[];
 }
 
 export interface Settings {

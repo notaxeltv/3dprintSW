@@ -10,6 +10,8 @@ async function getOrCreateSettings() {
 export async function GET() {
   const settings = await getOrCreateSettings();
   return NextResponse.json({
+    companyName: settings.companyName,
+    logoUrl: settings.logoUrl,
     instagramUrl: settings.instagramUrl,
     facebookUrl: settings.facebookUrl,
     tiktokUrl: settings.tiktokUrl,
