@@ -33,7 +33,6 @@ export async function PUT(request: NextRequest) {
       ...social,
       siteDescription: parsed.data.siteDescription || null,
       legalAddress: parsed.data.legalAddress || null,
-      vatNumber: parsed.data.vatNumber || null,
     },
   });
 

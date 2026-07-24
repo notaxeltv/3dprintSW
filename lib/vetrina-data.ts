@@ -24,7 +24,6 @@ export async function getVetrinaSettings() {
     email: settings.email,
     siteDescription: settings.siteDescription,
     legalAddress: settings.legalAddress,
-    vatNumber: settings.vatNumber,
   };
 }
 

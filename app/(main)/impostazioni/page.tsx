@@ -21,7 +21,6 @@ export default function ImpostazioniPage() {
   const [socialLinks, setSocialLinks] = useState(emptySocialLinks());
   const [siteDescription, setSiteDescription] = useState("");
   const [legalAddress, setLegalAddress] = useState("");
-  const [vatNumber, setVatNumber] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -36,7 +35,6 @@ export default function ImpostazioniPage() {
         setSocialLinks(socialLinksFromSettings(data));
         setSiteDescription(data.siteDescription ?? "");
         setLegalAddress(data.legalAddress ?? "");
-        setVatNumber(data.vatNumber ?? "");
         setLoading(false);
       });
   }, []);
@@ -59,7 +57,6 @@ export default function ImpostazioniPage() {
           logoUrl,
           siteDescription,
           legalAddress,
-          vatNumber,
           ...socialLinks,
         }),
       });
@@ -143,15 +140,6 @@ export default function ImpostazioniPage() {
                     value={legalAddress}
                     onChange={(e) => setLegalAddress(e.target.value)}
                     placeholder="Via Example 1, 00100 Roma (RM), Italia"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="vatNumber">Partita IVA</Label>
-                  <Input
-                    id="vatNumber"
-                    value={vatNumber}
-                    onChange={(e) => setVatNumber(e.target.value)}
-                    placeholder="IT12345678901"
                   />
                 </div>
               </div>

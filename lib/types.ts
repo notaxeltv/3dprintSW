@@ -63,7 +63,6 @@ export interface Settings {
   email?: string | null;
   siteDescription?: string | null;
   legalAddress?: string | null;
-  vatNumber?: string | null;
 }
 
 export interface PrintLog {

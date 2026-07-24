@@ -9,14 +9,12 @@ export async function getLegalSettings() {
     privacyEmail: settings.email?.replace(/^mailto:/i, "") || null,
     siteDescription: settings.siteDescription,
     legalAddress: settings.legalAddress,
-    vatNumber: settings.vatNumber,
   };
 }
 
 export function formatLegalContact(settings: LegalSettings) {
   const lines = [settings.companyName];
   if (settings.legalAddress) lines.push(settings.legalAddress);
-  if (settings.vatNumber) lines.push(`P. IVA ${settings.vatNumber}`);
   if (settings.privacyEmail) lines.push(settings.privacyEmail);
   return lines;
 }
