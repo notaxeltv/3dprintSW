@@ -53,3 +53,65 @@ export const saleLogSchema = z.object({
 });
 
 export type SaleLogInput = z.infer<typeof saleLogSchema>;
+
+export const loginSchema = z.object({
+  username: z.string().trim().min(1, "Username obbligatorio"),
+  password: z.string().min(1, "Password obbligatoria"),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
+
+export const shopCreateSchema = z.object({
+  name: z.string().trim().min(1, "Il nome del negozio è obbligatorio"),
+  username: z.string().trim().min(3, "Username di almeno 3 caratteri"),
+  password: z.string().min(6, "Password di almeno 6 caratteri"),
+});
+
+export type ShopCreateInput = z.infer<typeof shopCreateSchema>;
+
+export const shopUpdateSchema = z.object({
+  name: z.string().trim().min(1).optional(),
+  username: z.string().trim().min(3).optional(),
+  password: z.string().min(6).optional(),
+  active: z.boolean().optional(),
+});
+
+export type ShopUpdateInput = z.infer<typeof shopUpdateSchema>;
+
+export const shopMarkupSchema = z.object({
+  productId: z.string().min(1),
+  markupPercent: z.coerce.number().min(0, "Il ricarico non può essere negativo"),
+});
+
+export type ShopMarkupInput = z.infer<typeof shopMarkupSchema>;
+
+export const shopSaleSchema = z.object({
+  productId: z.string().min(1, "Seleziona un modello"),
+  variantId: z.string().optional().nullable(),
+  quantity: z.coerce.number().int().positive("La quantità deve essere maggiore di 0"),
+  unitRetailPrice: z.coerce.number().min(0).optional(),
+  soldAt: z.string().optional(),
+  buyer: z.string().trim().optional().nullable(),
+  notes: z.string().trim().optional().nullable(),
+});
+
+export type ShopSaleInput = z.infer<typeof shopSaleSchema>;
+
+export const shopOrderItemSchema = z.object({
+  productId: z.string().min(1),
+  variantId: z.string().optional().nullable(),
+  quantity: z.coerce.number().int().positive("La quantità deve essere maggiore di 0"),
+});
+
+export const shopOrderCreateSchema = z.object({
+  notes: z.string().trim().optional().nullable(),
+  items: z.array(shopOrderItemSchema).min(1, "Aggiungi almeno un articolo all'ordine"),
+});
+
+export type ShopOrderCreateInput = z.infer<typeof shopOrderCreateSchema>;
+
+export const shopOrderStatusSchema = z.object({
+  status: z.enum(["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"]),
+});
+
+export type ShopOrderStatusInput = z.infer<typeof shopOrderStatusSchema>;
