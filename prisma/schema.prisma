@@ -86,9 +86,19 @@ model ProductVariant {
 }
 
 model Settings {
-  id          Int     @id @default(1)
-  companyName String  @default("La mia azienda")
-  logoUrl     String?
+  id           Int     @id @default(1)
+  companyName  String  @default("La mia azienda")
+  logoUrl      String?
+  instagramUrl String?
+  facebookUrl  String?
+  tiktokUrl    String?
+  youtubeUrl   String?
+  whatsappUrl  String?
+  telegramUrl  String?
+  linkedinUrl  String?
+  xUrl         String?
+  websiteUrl   String?
+  email        String?
 }
 
 model PrintLog {

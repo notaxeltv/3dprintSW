@@ -26,9 +26,21 @@ export const productSchema = z.object({
 
 export type ProductInput = z.infer<typeof productSchema>;
 
+const optionalUrl = z.string().trim().optional().nullable();
+
 export const settingsSchema = z.object({
   companyName: z.string().trim().min(1, "Il nome dell'azienda è obbligatorio"),
   logoUrl: z.string().trim().optional().nullable(),
+  instagramUrl: optionalUrl,
+  facebookUrl: optionalUrl,
+  tiktokUrl: optionalUrl,
+  youtubeUrl: optionalUrl,
+  whatsappUrl: optionalUrl,
+  telegramUrl: optionalUrl,
+  linkedinUrl: optionalUrl,
+  xUrl: optionalUrl,
+  websiteUrl: optionalUrl,
+  email: optionalUrl,
 });
 
 export type SettingsInput = z.infer<typeof settingsSchema>;

@@ -40,6 +40,16 @@ export interface Product {
 export interface Settings {
   companyName: string;
   logoUrl: string | null;
+  instagramUrl?: string | null;
+  facebookUrl?: string | null;
+  tiktokUrl?: string | null;
+  youtubeUrl?: string | null;
+  whatsappUrl?: string | null;
+  telegramUrl?: string | null;
+  linkedinUrl?: string | null;
+  xUrl?: string | null;
+  websiteUrl?: string | null;
+  email?: string | null;
 }
 
 export interface PrintLog {

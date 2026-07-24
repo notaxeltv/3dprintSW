@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionFromRequest } from "@/lib/session";
 
 const PUBLIC_PATHS = ["/login"];
-const PUBLIC_API_PREFIXES = ["/api/auth/login"];
+const PUBLIC_API_PREFIXES = ["/api/auth/login", "/api/settings/public"];
 
 const ADMIN_ONLY_PREFIXES = [
   "/",
