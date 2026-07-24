@@ -23,6 +23,7 @@ model Product {
   printHours  Float?
   costPerUnit Float    @default(0)
   price       Float    @default(0)
+  publicPrice Float?
   minStock    Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -89,6 +90,7 @@ model ProductVariant {
   width     Float
   depth     Float
   price     Float
+  publicPrice Float?
   order     Int     @default(0)
 
   shopSales  ShopSaleLog[]

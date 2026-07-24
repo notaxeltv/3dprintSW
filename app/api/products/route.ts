@@ -37,6 +37,7 @@ export async function GET() {
       printHours: product.printHours,
       costPerUnit: product.costPerUnit,
       price: product.price,
+      publicPrice: product.publicPrice,
       minStock: product.minStock,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
@@ -76,6 +77,7 @@ export async function POST(request: NextRequest) {
       printHours: parsed.data.printHours ?? null,
       costPerUnit: parsed.data.costPerUnit,
       price: parsed.data.price,
+      publicPrice: parsed.data.publicPrice ?? null,
       minStock: parsed.data.minStock ?? 0,
       variants: parsed.data.variants?.length
         ? {
@@ -85,6 +87,7 @@ export async function POST(request: NextRequest) {
               width: v.width,
               depth: v.depth,
               price: v.price,
+              publicPrice: v.publicPrice ?? null,
               order: index,
             })),
           }

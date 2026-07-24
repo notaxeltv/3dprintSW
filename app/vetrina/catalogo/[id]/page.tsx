@@ -3,8 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import ProductGallery from "@/components/vetrina/ProductGallery";
 import { Card } from "@/components/ui/Card";
-import { formatCurrency } from "@/lib/format";
-import { formatPublicPrice } from "@/lib/public-catalog";
+import { formatPublicPrice, formatPublicVariantPrice } from "@/lib/public-catalog";
 import { getVetrinaProduct } from "@/lib/vetrina-data";
 
 export default async function VetrinaProductPage({
@@ -40,6 +39,9 @@ export default async function VetrinaProductPage({
             <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{product.name}</h1>
             <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
               {formatPublicPrice(product.priceFrom, product.priceTo)}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Prezzo indicativo sul sito. I negozi partner possono applicare tariffe diverse ai clienti finali.
             </p>
           </div>
 
@@ -83,7 +85,7 @@ export default async function VetrinaProductPage({
                       </p>
                     </div>
                     <p className="font-semibold text-slate-900 dark:text-slate-100">
-                      {formatCurrency(variant.price)}
+                      {formatPublicVariantPrice(variant.price)}
                     </p>
                   </div>
                 ))}

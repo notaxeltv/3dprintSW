@@ -16,6 +16,7 @@ export interface ProductVariant {
   width: number;
   depth: number;
   price: number;
+  publicPrice?: number | null;
   order: number;
 }
 
@@ -38,6 +39,7 @@ export interface Product {
   printHours: number | null;
   costPerUnit: number;
   price: number;
+  publicPrice?: number | null;
   minStock: number;
   createdAt: string;
   updatedAt: string;

@@ -6,6 +6,7 @@ export const productVariantSchema = z.object({
   width: z.coerce.number().min(0, "Non può essere negativa"),
   depth: z.coerce.number().min(0, "Non può essere negativa"),
   price: z.coerce.number().min(0, "Non può essere negativo"),
+  publicPrice: z.coerce.number().min(0).optional().nullable(),
 });
 
 export type ProductVariantInput = z.infer<typeof productVariantSchema>;
@@ -27,6 +28,7 @@ export const productSchema = z.object({
   printHours: z.coerce.number().min(0).optional().nullable(),
   costPerUnit: z.coerce.number().min(0, "Il costo non può essere negativo"),
   price: z.coerce.number().min(0, "Il prezzo non può essere negativo"),
+  publicPrice: z.coerce.number().min(0).optional().nullable(),
   minStock: z.coerce.number().int().min(0).optional(),
   variants: z.array(productVariantSchema).optional(),
   images: z.array(productImageSchema).optional(),
