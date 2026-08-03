@@ -108,6 +108,3 @@ export async function requireShop() {
   return session;
 }
 
-export function applyMarkup(wholesalePrice: number, markupPercent: number) {
-  return wholesalePrice * (1 + markupPercent / 100);
-}

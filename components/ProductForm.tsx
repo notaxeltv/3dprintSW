@@ -6,6 +6,7 @@ import { Product } from "@/lib/types";
 import Button from "./ui/Button";
 import { Input, Label, Textarea, FieldError } from "./ui/Field";
 import ImageUploadField from "./ImageUploadField";
+import ProductGalleryField, { type GalleryImageInput } from "./ProductGalleryField";
 
 interface Props {
   product?: Product | null;
@@ -19,10 +20,11 @@ interface VariantRow {
   width: string;
   depth: string;
   price: string;
+  publicPrice: string;
 }
 
 function emptyVariant(): VariantRow {
-  return { label: "", height: "", width: "", depth: "", price: "" };
+  return { label: "", height: "", width: "", depth: "", price: "", publicPrice: "" };
 }
 
 export default function ProductForm({ product, onSaved, onCancel }: Props) {
@@ -36,6 +38,7 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
     printHours: product?.printHours?.toString() ?? "",
     costPerUnit: product?.costPerUnit?.toString() ?? "0",
     price: product?.price?.toString() ?? "0",
+    publicPrice: product?.publicPrice?.toString() ?? "",
     minStock: product?.minStock?.toString() ?? "0",
   });
   const [variants, setVariants] = useState<VariantRow[]>(
@@ -46,6 +49,15 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
           width: v.width.toString(),
           depth: v.depth.toString(),
           price: v.price.toString(),
+          publicPrice: v.publicPrice?.toString() ?? "",
+        }))
+      : []
+  );
+  const [gallery, setGallery] = useState<GalleryImageInput[]>(
+    product?.images?.length
+      ? product.images.map((image) => ({
+          url: image.url,
+          caption: image.caption ?? "",
         }))
       : []
   );
@@ -83,6 +95,14 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
         width: Number(v.width || 0),
         depth: Number(v.depth || 0),
         price: Number(v.price || 0),
+        publicPrice: v.publicPrice === "" ? null : Number(v.publicPrice),
+      }));
+
+    const galleryPayload = gallery
+      .filter((image) => image.url.trim() !== "")
+      .map((image) => ({
+        url: image.url.trim(),
+        caption: image.caption.trim() || null,
       }));
 
     const payload = {
@@ -90,8 +110,11 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
       printHours: form.printHours === "" ? null : Number(form.printHours),
       costPerUnit: Number(form.costPerUnit),
       price: Number(form.price),
+      publicPrice: form.publicPrice === "" ? 0 : Number(form.publicPrice),
       minStock: Number(form.minStock),
       variants: validVariants,
+      images: galleryPayload,
+      imageUrl: form.imageUrl || galleryPayload[0]?.url || "",
     };
 
     try {
@@ -189,6 +212,8 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
         onChange={(url) => setForm((f) => ({ ...f, imageUrl: url }))}
       />
 
+      <ProductGalleryField value={gallery} onChange={setGallery} />
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="printHours">Ore di stampa</Label>
@@ -211,6 +236,13 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
             onChange={update("minStock")}
           />
         </div>
+      </div>
+
+      <div className="rounded-lg border border-indigo-100 bg-indigo-50/70 px-3 py-2 text-xs text-indigo-900 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-200">
+        <strong>Prezzo al negozio</strong>: quanto pagano i negozi partner quando ordinano da te.
+        <br />
+        <strong>Prezzo al pubblico</strong>: prezzo ufficiale che decidi tu — uguale in vetrina e in tutti i negozi.
+        Il margine del negozio è automatico (prezzo al pubblico − prezzo al negozio).
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -240,6 +272,23 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
           />
           <FieldError>{errors.price?.[0]}</FieldError>
         </div>
+        <div>
+          <Label htmlFor="publicPrice">Prezzo al pubblico (€) *</Label>
+          <Input
+            id="publicPrice"
+            type="number"
+            step="0.01"
+            min="0"
+            value={form.publicPrice}
+            onChange={update("publicPrice")}
+            placeholder="Es. 24,90"
+            required
+          />
+          <p className="mt-1 text-xs text-slate-400">
+            Stesso prezzo in vetrina e per tutti i negozi partner.
+          </p>
+          <FieldError>{errors.publicPrice?.[0]}</FieldError>
+        </div>
       </div>
 
       <div className="rounded-lg border border-slate-200 p-3 dark:border-slate-700">
@@ -254,15 +303,14 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
 
         {variants.length === 0 && (
           <p className="text-xs text-slate-400">
-            Facoltativo: aggiungi una o più combinazioni altezza × larghezza × profondità con il
-            relativo prezzo. Verranno mostrate nel catalogo e nel PDF esportato.
+            Facoltativo: aggiungi misure con prezzo negozio e, se diverso, prezzo al pubblico per misura.
           </p>
         )}
 
         <div className="space-y-2">
           {variants.map((row, index) => (
             <div key={index} className="grid grid-cols-12 gap-2 items-end">
-              <div className="col-span-3">
+              <div className="col-span-12 sm:col-span-2">
                 {index === 0 && <Label className="text-[11px]">Etichetta</Label>}
                 <Input
                   value={row.label}
@@ -270,7 +318,7 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
                   placeholder="Es. S"
                 />
               </div>
-              <div className="col-span-2">
+              <div className="col-span-4 sm:col-span-2">
                 {index === 0 && <Label className="text-[11px]">Alt. (cm)</Label>}
                 <Input
                   type="number"
@@ -280,7 +328,7 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
                   onChange={(e) => updateVariant(index, "height", e.target.value)}
                 />
               </div>
-              <div className="col-span-2">
+              <div className="col-span-4 sm:col-span-2">
                 {index === 0 && <Label className="text-[11px]">Larg. (cm)</Label>}
                 <Input
                   type="number"
@@ -290,7 +338,7 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
                   onChange={(e) => updateVariant(index, "width", e.target.value)}
                 />
               </div>
-              <div className="col-span-2">
+              <div className="col-span-4 sm:col-span-2">
                 {index === 0 && <Label className="text-[11px]">Prof. (cm)</Label>}
                 <Input
                   type="number"
@@ -300,7 +348,7 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
                   onChange={(e) => updateVariant(index, "depth", e.target.value)}
                 />
               </div>
-              <div className="col-span-2">
+              <div className="col-span-6 sm:col-span-2">
                 {index === 0 && <Label className="text-[11px]">Prezzo negozio (€)</Label>}
                 <Input
                   type="number"
@@ -308,6 +356,17 @@ export default function ProductForm({ product, onSaved, onCancel }: Props) {
                   min="0"
                   value={row.price}
                   onChange={(e) => updateVariant(index, "price", e.target.value)}
+                />
+              </div>
+              <div className="col-span-5 sm:col-span-1">
+                {index === 0 && <Label className="text-[11px]">Pubblico (€)</Label>}
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={row.publicPrice}
+                  onChange={(e) => updateVariant(index, "publicPrice", e.target.value)}
+                  placeholder="—"
                 />
               </div>
               <div className="col-span-1">

@@ -6,9 +6,17 @@ export const productVariantSchema = z.object({
   width: z.coerce.number().min(0, "Non può essere negativa"),
   depth: z.coerce.number().min(0, "Non può essere negativa"),
   price: z.coerce.number().min(0, "Non può essere negativo"),
+  publicPrice: z.coerce.number().min(0).optional().nullable(),
 });
 
 export type ProductVariantInput = z.infer<typeof productVariantSchema>;
+
+export const productImageSchema = z.object({
+  url: z.string().trim().min(1, "URL immagine obbligatoria"),
+  caption: z.string().trim().optional().nullable(),
+});
+
+export type ProductImageInput = z.infer<typeof productImageSchema>;
 
 export const productSchema = z.object({
   name: z.string().trim().min(1, "Il nome è obbligatorio"),
@@ -20,15 +28,31 @@ export const productSchema = z.object({
   printHours: z.coerce.number().min(0).optional().nullable(),
   costPerUnit: z.coerce.number().min(0, "Il costo non può essere negativo"),
   price: z.coerce.number().min(0, "Il prezzo non può essere negativo"),
+  publicPrice: z.coerce.number().min(0, "Il prezzo al pubblico è obbligatorio"),
   minStock: z.coerce.number().int().min(0).optional(),
   variants: z.array(productVariantSchema).optional(),
+  images: z.array(productImageSchema).optional(),
 });
 
 export type ProductInput = z.infer<typeof productSchema>;
 
+const optionalUrl = z.string().trim().optional().nullable();
+
 export const settingsSchema = z.object({
   companyName: z.string().trim().min(1, "Il nome dell'azienda è obbligatorio"),
   logoUrl: z.string().trim().optional().nullable(),
+  instagramUrl: optionalUrl,
+  facebookUrl: optionalUrl,
+  tiktokUrl: optionalUrl,
+  youtubeUrl: optionalUrl,
+  whatsappUrl: optionalUrl,
+  telegramUrl: optionalUrl,
+  linkedinUrl: optionalUrl,
+  xUrl: optionalUrl,
+  websiteUrl: optionalUrl,
+  email: optionalUrl,
+  siteDescription: z.string().trim().optional().nullable(),
+  legalAddress: z.string().trim().optional().nullable(),
 });
 
 export type SettingsInput = z.infer<typeof settingsSchema>;

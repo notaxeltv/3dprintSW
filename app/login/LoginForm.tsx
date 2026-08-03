@@ -1,10 +1,12 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Boxes, LogIn } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Field";
+import SocialLinks from "@/components/SocialLinks";
+import type { Settings } from "@/lib/types";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -13,6 +15,14 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [socialLinks, setSocialLinks] = useState<Partial<Settings>>({});
+
+  useEffect(() => {
+    fetch("/api/settings/public")
+      .then((r) => (r.ok ? r.json() : {}))
+      .then((data) => setSocialLinks(data))
+      .catch(() => setSocialLinks({}));
+  }, []);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -100,6 +110,13 @@ export default function LoginForm() {
             <LogIn size={16} /> {submitting ? "Accesso..." : "Accedi"}
           </Button>
         </form>
+
+        <div className="space-y-3 text-center">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
+            Seguici
+          </p>
+          <SocialLinks links={socialLinks} />
+        </div>
       </div>
     </div>
   );

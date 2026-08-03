@@ -23,6 +23,7 @@ model Product {
   printHours  Float?
   costPerUnit Float    @default(0)
   price       Float    @default(0)
+  publicPrice Float?
   minStock    Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -30,6 +31,7 @@ model Product {
   prints     PrintLog[]
   sales      SaleLog[]
   variants   ProductVariant[]
+  images     ProductImage[]
   markups    ShopProductMarkup[]
   shopSales  ShopSaleLog[]
   orderItems ShopOrderItem[]
@@ -70,6 +72,15 @@ model ShopProductMarkup {
   @@unique([shopId, productId])
 }
 
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  caption   String?
+  order     Int     @default(0)
+}
+
 model ProductVariant {
   id        String  @id @default(cuid())
   productId String
@@ -79,6 +90,7 @@ model ProductVariant {
   width     Float
   depth     Float
   price     Float
+  publicPrice Float?
   order     Int     @default(0)
 
   shopSales  ShopSaleLog[]
@@ -86,9 +98,21 @@ model ProductVariant {
 }
 
 model Settings {
-  id          Int     @id @default(1)
-  companyName String  @default("La mia azienda")
-  logoUrl     String?
+  id           Int     @id @default(1)
+  companyName  String  @default("La mia azienda")
+  logoUrl      String?
+  instagramUrl String?
+  facebookUrl  String?
+  tiktokUrl    String?
+  youtubeUrl   String?
+  whatsappUrl  String?
+  telegramUrl  String?
+  linkedinUrl  String?
+  xUrl         String?
+  websiteUrl      String?
+  email           String?
+  siteDescription String?
+  legalAddress    String?
 }
 
 model PrintLog {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { settingsSchema } from "@/lib/validation";
+import { normalizeSocialLinksInput } from "@/lib/social";
 
 async function getOrCreateSettings() {
   const existing = await prisma.settings.findUnique({ where: { id: 1 } });
@@ -22,12 +23,16 @@ export async function PUT(request: NextRequest) {
   }
 
   await getOrCreateSettings();
+  const social = normalizeSocialLinksInput(parsed.data);
 
   const settings = await prisma.settings.update({
     where: { id: 1 },
     data: {
       companyName: parsed.data.companyName,
       logoUrl: parsed.data.logoUrl || null,
+      ...social,
+      siteDescription: parsed.data.siteDescription || null,
+      legalAddress: parsed.data.legalAddress || null,
     },
   });
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { productSchema } from "@/lib/validation";
+import { buildProductImagesCreate, resolveProductCoverImage } from "@/lib/product-images";
 
 export async function GET() {
   const products = await prisma.product.findMany({
@@ -9,6 +10,7 @@ export async function GET() {
       prints: true,
       sales: true,
       variants: { orderBy: { order: "asc" } },
+      images: { orderBy: { order: "asc" } },
     },
   });
 
@@ -35,10 +37,12 @@ export async function GET() {
       printHours: product.printHours,
       costPerUnit: product.costPerUnit,
       price: product.price,
+      publicPrice: product.publicPrice,
       minStock: product.minStock,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
       variants: product.variants,
+      images: product.images,
       stats: {
         printed,
         sold,
@@ -68,11 +72,12 @@ export async function POST(request: NextRequest) {
       description: parsed.data.description || null,
       category: parsed.data.category || null,
       subcategory: parsed.data.subcategory || null,
-      imageUrl: parsed.data.imageUrl || null,
+      imageUrl: resolveProductCoverImage(parsed.data.imageUrl, parsed.data.images),
       material: parsed.data.material || null,
       printHours: parsed.data.printHours ?? null,
       costPerUnit: parsed.data.costPerUnit,
       price: parsed.data.price,
+      publicPrice: parsed.data.publicPrice,
       minStock: parsed.data.minStock ?? 0,
       variants: parsed.data.variants?.length
         ? {
@@ -82,12 +87,19 @@ export async function POST(request: NextRequest) {
               width: v.width,
               depth: v.depth,
               price: v.price,
+              publicPrice: v.publicPrice ?? null,
               order: index,
             })),
           }
         : undefined,
+      images: buildProductImagesCreate(parsed.data.images)?.length
+        ? { create: buildProductImagesCreate(parsed.data.images) }
+        : undefined,
     },
-    include: { variants: { orderBy: { order: "asc" } } },
+    include: {
+      variants: { orderBy: { order: "asc" } },
+      images: { orderBy: { order: "asc" } },
+    },
   });
 
   return NextResponse.json(product, { status: 201 });

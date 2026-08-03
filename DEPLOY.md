@@ -6,17 +6,28 @@ Guida per mettere online l'app con **dominio personalizzato** e **VPS Linux**, s
 
 ## Panoramica
 
+Architettura consigliata con **sito vetrina pubblico** + **Dashboard su sottodominio**:
+
 ```
-Internet → https://catalogo.tuodominio.it
+https://tuodominio.it              → Vetrina (catalogo pubblico, galleria foto, social)
+https://www.tuodominio.it          → Stesso sito (redirect o alias)
+https://app.tuodominio.it/login    → Dashboard 3DPrintSW (admin + negozi)
               ↓
-         Caddy (HTTPS)
+         Caddy (HTTPS, entrambi i domini)
               ↓
          Next.js :3000 (PM2)
               ↓
     dev.db + public/uploads/
 ```
 
-L'app usa **SQLite** e file locali: un VPS con disco persistente è la scelta ideale **senza modificare il codice**.
+| Dominio | Ruolo | Chi ci entra |
+|---------|-------|--------------|
+| **tuodominio.it** | Vetrina commerciale | Clienti, visitatori |
+| **app.tuodominio.it** | Dashboard gestionale | Admin e negozi (login) |
+
+La vetrina mostra i prodotti del catalogo (con più foto e descrizioni), i link social e un pulsante **«Accedi alla Dashboard»** che porta al sottodominio. Admin e negozi non usano la vetrina per lavorare: entrano solo da `app.`.
+
+L'app usa **SQLite** e file locali: un VPS con disco persistente è la scelta ideale **senza modificare il codice** per il deploy base; vetrina e Dashboard possono convivere nello stesso progetto Next.js (routing per dominio) sullo stesso VPS.
 
 ---
 
@@ -117,7 +128,8 @@ Nessun costo per: Node.js, PM2, Caddy, certificati SSL, Let's Encrypt.
 
 ## 2. Registra il dominio e punta al VPS
 
-Esempio: `catalogo.tuaazienda.it`
+Esempio dominio principale: `tuaazienda.it`  
+Sottodominio Dashboard: `app.tuaazienda.it`
 
 Nel pannello DNS del registrar (o Cloudflare):
 
@@ -125,13 +137,16 @@ Nel pannello DNS del registrar (o Cloudflare):
 |------|------|--------|-----|
 | **A** | `@` | `IP_DEL_VPS` | Auto |
 | **A** | `www` | `IP_DEL_VPS` | Auto |
+| **A** | `app` | `IP_DEL_VPS` | Auto |
 
 Propagazione DNS: da pochi minuti a 24 ore (di solito < 1 ora).
 
 Verifica:
 
 ```bash
-dig +short catalogo.tuaazienda.it
+dig +short tuaazienda.it
+dig +short www.tuaazienda.it
+dig +short app.tuaazienda.it
 ```
 
 ---
@@ -259,13 +274,24 @@ pm2 restart 3dprintsw
 sudo nano /etc/caddy/Caddyfile
 ```
 
-Sostituisci con il tuo dominio:
+Sostituisci con i tuoi domini (vetrina + Dashboard):
 
 ```
-catalogo.tuaazienda.it {
+tuaazienda.it, www.tuaazienda.it {
+    reverse_proxy localhost:3000
+}
+
+app.tuaazienda.it {
     reverse_proxy localhost:3000
 }
 ```
+
+Entrambi puntano alla stessa app Next.js; il routing interno distingue vetrina (dominio principale) da Dashboard (sottodominio `app.`).
+
+Apri `https://app.tuaazienda.it/login` — dovresti vedere la pagina di accesso con lucchetto verde.  
+La vetrina sarà su `https://tuaazienda.it` (da implementare nel progetto).
+
+---
 
 Riavvia Caddy:
 
@@ -273,13 +299,9 @@ Riavvia Caddy:
 sudo systemctl reload caddy
 ```
 
-Apri `https://catalogo.tuaazienda.it/login` — dovresti vedere la pagina di accesso con lucchetto verde.
-
----
-
 ## 7. Primo accesso
 
-1. Vai su `https://catalogo.tuaazienda.it/login`
+1. Vai su `https://app.tuaazienda.it/login`
 2. Accedi con `ADMIN_USERNAME` / `ADMIN_PASSWORD` del `.env`
 3. Cambia subito la password se hai usato quella di default
 4. Da **Impostazioni** configura nome azienda e logo
@@ -288,7 +310,7 @@ Apri `https://catalogo.tuaazienda.it/login` — dovresti vedere la pagina di acc
 Link per i negozi:
 
 ```
-https://catalogo.tuaazienda.it/login
+https://app.tuaazienda.it/login
 ```
 
 ---

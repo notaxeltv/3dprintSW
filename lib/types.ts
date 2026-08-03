@@ -16,6 +16,15 @@ export interface ProductVariant {
   width: number;
   depth: number;
   price: number;
+  publicPrice?: number | null;
+  order: number;
+}
+
+export interface ProductImage {
+  id: string;
+  productId: string;
+  url: string;
+  caption: string | null;
   order: number;
 }
 
@@ -30,16 +39,30 @@ export interface Product {
   printHours: number | null;
   costPerUnit: number;
   price: number;
+  publicPrice?: number | null;
   minStock: number;
   createdAt: string;
   updatedAt: string;
   stats: ProductStats;
   variants?: ProductVariant[];
+  images?: ProductImage[];
 }
 
 export interface Settings {
   companyName: string;
   logoUrl: string | null;
+  instagramUrl?: string | null;
+  facebookUrl?: string | null;
+  tiktokUrl?: string | null;
+  youtubeUrl?: string | null;
+  whatsappUrl?: string | null;
+  telegramUrl?: string | null;
+  linkedinUrl?: string | null;
+  xUrl?: string | null;
+  websiteUrl?: string | null;
+  email?: string | null;
+  siteDescription?: string | null;
+  legalAddress?: string | null;
 }
 
 export interface PrintLog {
