@@ -1,0 +1,52 @@
+3DPrintSW — Progetto completo
+==============================
+
+Avvio rapido
+------------
+
+1. Installa Node.js 20+ da https://nodejs.org
+2. Apri un terminale in questa cartella
+3. Copia .env.example in .env e modifica AUTH_SECRET e password admin
+4. Esegui:
+
+   npm install
+   npm run db:deploy
+   npm run dev
+
+5. Apri http://localhost:3000/login
+
+   Admin di default: admin / admin123
+   (creato automaticamente al primo login se non esiste nessun utente)
+
+
+Cosa c'è nel progetto
+---------------------
+
+- app/           → pagine Next.js (vetrina + dashboard)
+- components/    → componenti React
+- lib/           → logica condivisa (auth, prezzi, SEO, ecc.)
+- prisma/        → schema database e migrazioni SQLite
+- public/        → file statici e cartella uploads/
+- scripts/       → seed demo, backup, screenshot
+- DEPLOY.md      → guida deploy VPS + dominio
+- README.md      → documentazione completa
+
+
+Architettura domini (produzione)
+---------------------------------
+
+  tuodominio.it       → vetrina pubblica
+  app.tuodominio.it   → dashboard admin/negozi
+
+Vedi DEPLOY.md per i dettagli.
+
+
+Note
+----
+
+- node_modules/ non è incluso: si ricrea con npm install
+- Il database dev.db non è incluso: si crea con npm run db:deploy
+- Dopo npm install, Prisma genera automaticamente il client
+- Per dati demo: npx tsx scripts/seed-demo-data.mjs
+
+Repository: https://github.com/notaxeltv/3dprintSW
