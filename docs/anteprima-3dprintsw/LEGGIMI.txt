@@ -1,0 +1,66 @@
+3DPrintSW — Anteprima completa
+================================
+
+Questo archivio contiene gli screenshot di tutte le pagine dell'applicazione
+3DPrintSW: sito vetrina pubblico + Dashboard admin + area negozio partner.
+
+Repository: https://github.com/notaxeltv/3dprintSW
+
+
+STRUTTURA CARTELLE
+------------------
+
+vetrina/     → Sito pubblico (tuodominio.it)
+  01-vetrina-home.png       Home con prodotti in evidenza
+  02-vetrina-catalogo.png   Catalogo completo
+  03-vetrina-prodotto.png    Scheda singolo prodotto
+  04-vetrina-privacy.png     Privacy Policy GDPR
+  05-vetrina-cookie.png      Cookie Policy
+
+dashboard/   → Area admin (app.tuodominio.it)
+  06-login.png               Pagina di accesso
+  07-dashboard-home.png      Statistiche e grafici
+  08-dashboard-catalogo.png  Gestione catalogo modelli
+  09-dashboard-prodotto.png  Modifica prodotto
+  10-dashboard-stampe.png    Log stampe
+  11-dashboard-vendite.png   Vendite dirette
+  12-dashboard-ordini-negozi.png  Ordini dai negozi partner
+  13-dashboard-negozi.png    Gestione negozi
+  14-dashboard-impostazioni.png   Logo, social, SEO, legal
+
+negozio/     → Area negozio partner
+  15-negozio-home.png        Dashboard negozio
+  16-negozio-catalogo.png    Catalogo con prezzi wholesale e margine
+  17-negozio-vendite.png     Vendite al cliente
+  18-negozio-ordini.png      Ordini al fornitore
+
+
+ARCHITETTURA
+------------
+
+  tuodominio.it          → Vetrina pubblica (clienti)
+  app.tuodominio.it      → Dashboard (admin + negozi)
+
+
+FUNZIONALITÀ PRINCIPALI
+-----------------------
+
+- Catalogo stampe 3D con galleria foto e varianti/misure
+- Prezzo al negozio (wholesale) e prezzo al pubblico (fissato dall'admin)
+- Gestione stampe, vendite, ordini negozi
+- Account separati per admin e negozi partner
+- Link social configurabili, SEO, Privacy e Cookie Policy
+- Esportazione catalogo in PDF
+- Dark mode
+
+
+CREDENZIALI DEMO (negli screenshot)
+-----------------------------------
+
+  Admin:   admin / admin123
+  Negozio: negozio_demo / negozio123
+
+(Dati di esempio — non usare in produzione)
+
+
+Deploy e documentazione tecnica: vedi DEPLOY.md nel repository GitHub.
