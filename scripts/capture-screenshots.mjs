@@ -15,21 +15,38 @@ const VIEWPORT = { width: 1440, height: 900 };
 async function waitForPage(page, selector = "main, h1, form", timeout = 15000) {
   await page.waitForLoadState("networkidle", { timeout }).catch(() => {});
   await page.waitForSelector(selector, { timeout }).catch(() => {});
-  await page.waitForTimeout(600);
+  await page.waitForTimeout(1200);
+}
+
+async function waitForDashboard(page) {
+  await page.waitForSelector("text=Modelli in catalogo", { timeout: 25000 }).catch(() =>
+    page.waitForSelector("text=Panoramica", { timeout: 10000 })
+  );
+  await page.waitForTimeout(1000);
 }
 
 
 async function login(page, username, password) {
-  const res = await page.request.post(`${BASE}/api/auth/login`, {
-    data: { username, password },
-  });
-  if (!res.ok()) {
-    throw new Error(`Login fallito per ${username}: ${res.status()}`);
+  await page.goto(`${BASE}/login`);
+  await waitForPage(page, "form");
+  await page.evaluate(
+    async ({ username, password }) => {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      if (!res.ok) throw new Error(`Login fallito (${res.status})`);
+    },
+    { username, password }
+  );
+  const target = username.startsWith("negozio") ? "/negozio" : "/";
+  await page.goto(`${BASE}${target}`, { waitUntil: "networkidle" });
+  if (target === "/negozio") {
+    await page.waitForSelector("text=Pezzi venduti", { timeout: 25000 }).catch(() => {});
+  } else {
+    await waitForDashboard(page);
   }
-  const data = await res.json();
-  const target = data.user.role === "SHOP" ? "/negozio" : "/";
-  await page.goto(`${BASE}${target}`);
-  await waitForPage(page);
 }
 
 async function logout(page) {
